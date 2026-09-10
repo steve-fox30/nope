@@ -1,658 +1,112 @@
+```html
 <!DOCTYPE html>
 <html lang="id">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-
     <title>MINI GAME</title>
 
     <style>
-
-        /* =========================
-           RESET
-        ========================= */
-
         * {
+            box-sizing: border-box;
             margin: 0;
             padding: 0;
-            box-sizing: border-box;
         }
-
-
-        /* =========================
-           BACKGROUND
-        ========================= */
 
         body {
             min-height: 100vh;
-            overflow: hidden;
-
+            background: #050505 url("fox.webp") center/cover fixed no-repeat;
+            color: white;
+            font-family: Arial, sans-serif;
             display: flex;
             justify-content: center;
             align-items: center;
-
-            font-family: Arial, sans-serif;
-
-            /*
-               GANTI background.jpg
-               DENGAN NAMA FILE
-               BACKGROUND PUNYA LU
-            */
-
-            background-image: url("fox.webp");
-
-            background-size: cover;
-            background-position: center;
-            background-repeat: no-repeat;
-
-            position: relative;
+            text-align: center;
+            overflow: hidden;
         }
-
-
-        /* LAPISAN GELAP */
 
         body::before {
             content: "";
-
-            position: absolute;
-
-            top: 0;
-            left: 0;
-
-            width: 100%;
-            height: 100%;
-
-            background: rgba(0, 0, 0, 0.35);
-
-            z-index: 1;
-        }
-
-
-        /* =========================
-           GARIS OREN KIRI
-        ========================= */
-
-        .border-left {
             position: fixed;
-
-            left: 15px;
-            top: 20px;
-
-            width: 5px;
-            height: calc(100% - 40px);
-
-            background: orange;
-
-            border-radius: 10px;
-
-            box-shadow:
-                0 0 10px orange,
-                0 0 25px orange;
-
-            z-index: 10;
+            inset: 0;
+            background: rgba(0, 0, 0, 0.72);
+            z-index: -1;
         }
-
-
-        /* =========================
-           GARIS OREN KANAN
-        ========================= */
-
-        .border-right {
-            position: fixed;
-
-            right: 15px;
-            top: 20px;
-
-            width: 5px;
-            height: calc(100% - 40px);
-
-            background: orange;
-
-            border-radius: 10px;
-
-            box-shadow:
-                0 0 10px orange,
-                0 0 25px orange;
-
-            z-index: 10;
-        }
-
-
-        /* =========================
-           KONTEN UTAMA
-        ========================= */
 
         .container {
-            position: relative;
-
-            z-index: 5;
-
-            text-align: center;
-
-            padding: 30px;
-
-            animation: muncul 1s ease;
+            width: 90%;
+            max-width: 700px;
         }
 
-
-        /* =========================
-           LOGO RUBAH
-        ========================= */
-
-        .fox-logo {
-            width: 190px;
-            max-width: 70vw;
-
-            margin-bottom: 15px;
-
-            filter:
-                drop-shadow(0 0 8px orange)
-                drop-shadow(0 0 20px orange);
-
-            animation: foxFloat 3s ease-in-out infinite;
+        .fox {
+            font-size: 80px;
+            margin-bottom: 10px;
+            filter: drop-shadow(0 0 15px #ff7b00);
         }
-
-
-        /* BAGIAN OREN LOGO */
-
-        .fox-orange {
-            fill: #ff8c00;
-        }
-
-
-        /* BAGIAN GELAP LOGO */
-
-        .fox-dark {
-            fill: #171717;
-        }
-
-
-        /* BAGIAN PUTIH LOGO */
-
-        .fox-white {
-            fill: #ffffff;
-        }
-
-
-        /* MATA */
-
-        .fox-eye {
-            fill: #000000;
-        }
-
-
-        /* =========================
-           JUDUL
-        ========================= */
 
         h1 {
-            color: white;
-
-            font-size: 55px;
-
-            letter-spacing: 5px;
-
-            text-shadow:
-                0 0 10px orange,
-                0 0 25px orange;
-
-            margin-bottom: 15px;
+            font-size: clamp(45px, 10vw, 85px);
+            color: #ff7b00;
+            letter-spacing: 8px;
+            text-shadow: 0 0 15px #ff7b00;
         }
-
-
-        /* =========================
-           SUBTITLE
-        ========================= */
 
         .subtitle {
-            color: #eeeeee;
-
-            font-size: 18px;
-
-            margin-bottom: 35px;
-
-            letter-spacing: 2px;
-
-            text-shadow: 0 0 10px black;
+            margin-top: 10px;
+            color: #ddd;
+            font-size: 16px;
         }
-
-
-        /* =========================
-           TOMBOL MULAI
-        ========================= */
 
         .start-btn {
             display: inline-block;
-
-            padding: 15px 50px;
-
-            border: 3px solid orange;
-
-            border-radius: 50px;
-
-            background: rgba(0, 0, 0, 0.55);
-
-            color: white;
-
+            margin-top: 40px;
+            padding: 15px 45px;
+            border: 2px solid #ff7b00;
+            color: #ff7b00;
             text-decoration: none;
-
-            font-size: 20px;
-
             font-weight: bold;
-
             letter-spacing: 3px;
-
-            cursor: pointer;
-
             transition: 0.3s;
-
-            box-shadow:
-                0 0 10px orange,
-                0 0 25px rgba(255, 165, 0, 0.5);
+            box-shadow: 0 0 10px rgba(255,123,0,.3);
         }
-
 
         .start-btn:hover {
-            background: orange;
-
-            color: black;
-
-            transform: scale(1.1);
-
-            box-shadow:
-                0 0 20px orange,
-                0 0 40px orange;
+            background: #ff7b00;
+            color: #000;
+            box-shadow: 0 0 25px #ff7b00;
         }
 
-
-        /* =========================
-           EMOJI HUJAN
-        ========================= */
-
-        .emoji {
-            position: fixed;
-
-            top: -100px;
-
-            z-index: 2;
-
-            pointer-events: none;
-
-            opacity: 0.85;
-
-            animation-name: hujan;
-
-            animation-timing-function: linear;
-
-            animation-iteration-count: infinite;
+        .symbols {
+            margin-top: 35px;
+            color: #ff7b00;
+            letter-spacing: 18px;
+            font-size: 22px;
+            opacity: .8;
         }
-
-
-        /* =========================
-           ANIMASI EMOJI TURUN
-        ========================= */
-
-        @keyframes hujan {
-
-            0% {
-                transform:
-                    translateY(-100px)
-                    rotate(0deg);
-
-                opacity: 0;
-            }
-
-
-            10% {
-                opacity: 0.85;
-            }
-
-
-            90% {
-                opacity: 0.85;
-            }
-
-
-            100% {
-                transform:
-                    translateY(120vh)
-                    rotate(360deg);
-
-                opacity: 0;
-            }
-
-        }
-
-
-        /* =========================
-           ANIMASI MUNCUL
-        ========================= */
-
-        @keyframes muncul {
-
-            from {
-                opacity: 0;
-
-                transform:
-                    translateY(30px);
-            }
-
-
-            to {
-                opacity: 1;
-
-                transform:
-                    translateY(0);
-            }
-
-        }
-
-
-        /* =========================
-           ANIMASI LOGO RUBAH
-        ========================= */
-
-        @keyframes foxFloat {
-
-            0%,
-            100% {
-                transform:
-                    translateY(0);
-            }
-
-
-            50% {
-                transform:
-                    translateY(-10px);
-            }
-
-        }
-
-
-        /* =========================
-           MODE HP
-        ========================= */
-
-        @media (max-width: 600px) {
-
-            .fox-logo {
-                width: 145px;
-            }
-
-
-            h1 {
-                font-size: 38px;
-
-                letter-spacing: 3px;
-            }
-
-
-            .subtitle {
-                font-size: 15px;
-            }
-
-
-            .start-btn {
-                padding: 13px 40px;
-
-                font-size: 18px;
-            }
-
-
-            .emoji {
-                font-size: 28px;
-            }
-
-        }
-
     </style>
 </head>
 
-
 <body>
-
-
-    <!-- GARIS OREN -->
-
-    <div class="border-left"></div>
-
-    <div class="border-right"></div>
-
-
-
-    <!-- KONTEN UTAMA -->
 
     <div class="container">
 
-
-        <!-- =====================
-             LOGO RUBAH SVG
-        ====================== -->
-
-        <svg
-            class="fox-logo"
-            viewBox="0 0 200 200"
-            xmlns="http://www.w3.org/2000/svg"
-        >
-
-
-            <!-- TELINGA KIRI -->
-
-            <polygon
-                class="fox-orange"
-                points="40,65 20,10 85,45"
-            />
-
-
-            <!-- TELINGA KANAN -->
-
-            <polygon
-                class="fox-orange"
-                points="160,65 180,10 115,45"
-            />
-
-
-            <!-- KEPALA -->
-
-            <polygon
-                class="fox-orange"
-                points="
-                    100,30
-                    165,70
-                    150,135
-                    100,180
-                    50,135
-                    35,70
-                "
-            />
-
-
-            <!-- WAJAH PUTIH -->
-
-            <polygon
-                class="fox-white"
-                points="
-                    55,105
-                    100,160
-                    145,105
-                    130,150
-                    100,180
-                    70,150
-                "
-            />
-
-
-            <!-- MATA KIRI -->
-
-            <polygon
-                class="fox-eye"
-                points="
-                    60,85
-                    90,95
-                    72,110
-                "
-            />
-
-
-            <!-- MATA KANAN -->
-
-            <polygon
-                class="fox-eye"
-                points="
-                    140,85
-                    110,95
-                    128,110
-                "
-            />
-
-
-            <!-- HIDUNG -->
-
-            <polygon
-                class="fox-dark"
-                points="
-                    92,150
-                    108,150
-                    100,160
-                "
-            />
-
-        </svg>
-
-
-        <!-- JUDUL -->
+        <div class="fox">🦊</div>
 
         <h1>MINI GAME</h1>
 
+        <p class="subtitle">ya itulah pokok nya</p>
 
-        <!-- TULISAN -->
-
-        <p class="subtitle">
-            ya itulah pokok nya
-        </p>
-
-
-        <!-- TOMBOL -->
-
-        <a href="#" class="start-btn">
+        <!-- KLIK INI = MASUK KE HALAMAN YANG MENJAGA MUSIK -->
+        <a href="gamehub.html" class="start-btn">
             MULAI
         </a>
 
+        <div class="symbols">
+            &lt; &gt; [ ] { } + *
+        </div>
 
     </div>
 
-
-
-    <!-- =====================
-         JAVASCRIPT
-    ====================== -->
-
-    <script>
-
-        /* DAFTAR EMOJI */
-
-        const emojiList = [
-
-            "🎮",
-            "🃏",
-            "🎲",
-            "➤",
-            "⚡"
-
-        ];
-
-
-
-        /* MEMBUAT EMOJI */
-
-        function buatEmoji() {
-
-
-            const emoji =
-                document.createElement("div");
-
-
-            emoji.classList.add("emoji");
-
-
-
-            /* PILIH EMOJI RANDOM */
-
-            emoji.innerHTML =
-                emojiList[
-
-                    Math.floor(
-
-                        Math.random()
-                        *
-                        emojiList.length
-
-                    )
-
-                ];
-
-
-
-            /* POSISI RANDOM */
-
-            emoji.style.left =
-                Math.random() * 100
-                + "vw";
-
-
-
-            /* UKURAN RANDOM */
-
-            emoji.style.fontSize =
-                Math.random() * 25
-                + 25
-                + "px";
-
-
-
-            /* KECEPATAN RANDOM */
-
-            emoji.style.animationDuration =
-                Math.random() * 5
-                + 5
-                + "s";
-
-
-
-            /* MASUKKAN KE HALAMAN */
-
-            document.body.appendChild(
-                emoji
-            );
-
-
-
-            /* HAPUS SETELAH SELESAI */
-
-            setTimeout(() => {
-
-                emoji.remove();
-
-            }, 10000);
-
-
-        }
-
-
-
-        /* BUAT EMOJI TERUS */
-
-        setInterval(
-
-            buatEmoji,
-
-            700
-
-        );
-
-
-    </script>
-
-
 </body>
 </html>
+```
