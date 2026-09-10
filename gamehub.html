@@ -1,0 +1,311 @@
+```html
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <title>MINI GAME</title>
+
+    <style>
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        html,
+        body {
+            width: 100%;
+            height: 100%;
+            overflow: hidden;
+            background: #050505;
+        }
+
+        body {
+            background: #050505 url("fox.webp") center/cover fixed no-repeat;
+        }
+
+        body::before {
+            content: "";
+            position: fixed;
+            inset: 0;
+            background: rgba(0, 0, 0, 0.65);
+            z-index: 0;
+            pointer-events: none;
+        }
+
+        /* =========================
+           BAGIAN ATAS
+        ========================= */
+
+        .topbar {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 58px;
+
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+
+            padding: 0 20px;
+
+            border-bottom: 1px solid #ff7b00;
+            background: rgba(0, 0, 0, 0.85);
+
+            z-index: 10;
+        }
+
+        .title {
+            color: #ff7b00;
+            font-weight: bold;
+            letter-spacing: 3px;
+            font-size: 18px;
+        }
+
+        /* =========================
+           MUSIC CONTROL
+        ========================= */
+
+        .music-control {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .music-btn {
+            background: transparent;
+            border: 1px solid #ff7b00;
+            color: #ff7b00;
+            padding: 7px 12px;
+            cursor: pointer;
+            font-size: 13px;
+            transition: .2s;
+        }
+
+        .music-btn:hover {
+            background: #ff7b00;
+            color: #000;
+        }
+
+        .music-status {
+            color: #aaa;
+            font-size: 12px;
+        }
+
+        /* =========================
+           GAME AREA
+        ========================= */
+
+        .game-area {
+            position: fixed;
+            top: 58px;
+            left: 0;
+
+            width: 100%;
+            height: calc(100% - 58px);
+
+            z-index: 2;
+        }
+
+        iframe {
+            width: 100%;
+            height: 100%;
+            border: none;
+            display: block;
+            background: transparent;
+        }
+
+        /* =========================
+           ORANGE SIDE LINE
+        ========================= */
+
+        .side-left,
+        .side-right {
+            position: fixed;
+            top: 58px;
+            bottom: 0;
+            width: 2px;
+            background: #ff7b00;
+            box-shadow: 0 0 10px #ff7b00;
+            z-index: 5;
+            pointer-events: none;
+        }
+
+        .side-left {
+            left: 12px;
+        }
+
+        .side-right {
+            right: 12px;
+        }
+
+        @media (max-width: 600px) {
+
+            .topbar {
+                height: 52px;
+                padding: 0 12px;
+            }
+
+            .title {
+                font-size: 14px;
+            }
+
+            .music-status {
+                display: none;
+            }
+
+            .game-area {
+                top: 52px;
+                height: calc(100% - 52px);
+            }
+
+            .side-left {
+                left: 5px;
+            }
+
+            .side-right {
+                right: 5px;
+            }
+        }
+    </style>
+</head>
+
+<body>
+
+    <!-- =========================
+         AUDIO
+    ========================= -->
+
+    <audio id="backsound" loop>
+        <source src="backsound.mp3" type="audio/mpeg">
+    </audio>
+
+
+    <!-- =========================
+         TOP BAR
+    ========================= -->
+
+    <div class="topbar">
+
+        <div class="title">
+            [ MINI GAME ]
+        </div>
+
+        <div class="music-control">
+
+            <span class="music-status" id="musicStatus">
+                MUSIC ON
+            </span>
+
+            <button class="music-btn" id="musicBtn">
+                🔊
+            </button>
+
+        </div>
+
+    </div>
+
+
+    <!-- =========================
+         GAME PAGE
+    ========================= -->
+
+    <div class="game-area">
+
+        <iframe
+            id="gameFrame"
+            src="games.html">
+        </iframe>
+
+    </div>
+
+
+    <!-- SIDE LINES -->
+
+    <div class="side-left"></div>
+    <div class="side-right"></div>
+
+
+    <script>
+
+        const audio = document.getElementById("backsound");
+        const musicBtn = document.getElementById("musicBtn");
+        const musicStatus = document.getElementById("musicStatus");
+
+        let musicPlaying = false;
+
+
+        /*
+        =========================================
+        MULAIKAN MUSIK
+        =========================================
+        */
+
+        function startMusic() {
+
+            audio.volume = 0.45;
+
+            audio.play()
+                .then(() => {
+
+                    musicPlaying = true;
+
+                    musicBtn.textContent = "🔊";
+                    musicStatus.textContent = "MUSIC ON";
+
+                })
+                .catch(() => {
+
+                    musicStatus.textContent = "KLIK 🔊";
+
+                });
+        }
+
+
+        /*
+        =========================================
+        MUSIK DIMULAI SAAT MASUK GAMEHUB
+        =========================================
+        */
+
+        startMusic();
+
+
+        /*
+        =========================================
+        TOMBOL MUSIC
+        =========================================
+        */
+
+        musicBtn.addEventListener("click", function () {
+
+            if (musicPlaying) {
+
+                audio.pause();
+
+                musicPlaying = false;
+
+                musicBtn.textContent = "🔇";
+                musicStatus.textContent = "MUSIC OFF";
+
+            } else {
+
+                audio.play();
+
+                musicPlaying = true;
+
+                musicBtn.textContent = "🔊";
+                musicStatus.textContent = "MUSIC ON";
+
+            }
+
+        });
+
+    </script>
+
+</body>
+</html>
+```
