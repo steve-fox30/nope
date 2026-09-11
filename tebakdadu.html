@@ -1,1302 +1,816 @@
 <!DOCTYPE html>
 <html lang="id">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+<title>TEBAK DADU | MINI GAME</title>
+
+<style>
+
+*{
+    box-sizing:border-box;
+    margin:0;
+    padding:0;
+}
+
+body{
+    min-height:100vh;
+    background:#050505;
+    color:#fff;
+    font-family:Arial, sans-serif;
+    display:flex;
+    justify-content:center;
+    align-items:center;
+    overflow:hidden;
+}
 
-    <title>TEBAK DADU - MINI GAME</title>
+/* BACKGROUND */
 
-    <style>
+body::before{
+    content:"";
+    position:fixed;
+    inset:0;
+    background:
+        linear-gradient(rgba(255,140,0,.04) 1px,transparent 1px),
+        linear-gradient(90deg,rgba(255,140,0,.04) 1px,transparent 1px);
+    background-size:30px 30px;
+    pointer-events:none;
+}
 
-        * {
-            box-sizing: border-box;
-            margin: 0;
-            padding: 0;
-        }
+/* GAME BOX */
 
-        body {
-            min-height: 100vh;
+.game-container{
+    width:90%;
+    max-width:430px;
+    min-height:600px;
+    border:1px solid #ff8c00;
+    box-shadow:
+        0 0 20px rgba(255,140,0,.15),
+        inset 0 0 25px rgba(255,140,0,.03);
 
-            background:
-                linear-gradient(
-                    rgba(0,0,0,.82),
-                    rgba(0,0,0,.93)
-                ),
-                url("fox.webp")
-                center/cover fixed no-repeat;
+    padding:25px 20px;
+    text-align:center;
 
-            color: white;
+    display:flex;
+    flex-direction:column;
+    align-items:center;
 
-            font-family:
-                "Courier New",
-                monospace;
+    position:relative;
+}
 
-            overflow-x: hidden;
-        }
+/* HEADER */
 
+.title{
+    color:#ff8c00;
+    font-size:26px;
+    letter-spacing:4px;
+    margin-bottom:5px;
+}
 
-        /* =========================
-           SIDE LINE
-        ========================= */
+.subtitle{
+    color:#777;
+    font-size:12px;
+    letter-spacing:2px;
+}
 
-        .side {
-            position: fixed;
+/* SCORE */
 
-            top: 0;
-            bottom: 0;
+.score-box{
+    margin-top:20px;
+    font-size:14px;
+    color:#aaa;
+}
 
-            width: 2px;
+#score{
+    color:#ff8c00;
+    font-size:24px;
+    font-weight:bold;
+}
 
-            background: #ff7b00;
+/* DICE AREA */
 
-            box-shadow:
-                0 0 15px #ff7b00;
+.dice-area{
+    width:180px;
+    height:180px;
 
-            z-index: 20;
-        }
+    margin-top:35px;
 
-        .side.left {
-            left: 12px;
-        }
+    position:relative;
 
-        .side.right {
-            right: 12px;
-        }
+    display:flex;
+    justify-content:center;
+    align-items:center;
+}
 
+/* DICE */
 
-        /* =========================
-           TOP BAR
-        ========================= */
+.dice{
+    width:120px;
+    height:120px;
 
-        .topbar {
-            height: 65px;
+    background:#111;
 
-            display: flex;
+    border:2px solid #ff8c00;
 
-            justify-content:
-                space-between;
+    border-radius:18px;
 
-            align-items: center;
+    display:grid;
 
-            padding: 0 30px;
+    grid-template-columns:repeat(3,1fr);
+    grid-template-rows:repeat(3,1fr);
 
-            background:
-                rgba(0,0,0,.9);
+    padding:14px;
 
-            border-bottom:
-                1px solid #ff7b00;
+    box-shadow:
+        0 0 20px rgba(255,140,0,.25);
+}
 
-            position: relative;
+/* DOT */
 
-            z-index: 10;
-        }
+.dot{
+    width:17px;
+    height:17px;
 
-        .title {
-            color: #ff7b00;
+    background:#ff8c00;
 
-            font-size: 20px;
+    border-radius:50%;
 
-            font-weight: bold;
+    align-self:center;
+    justify-self:center;
 
-            letter-spacing: 3px;
-        }
+    opacity:0;
+}
 
-        .score-top {
-            color: #aaa;
+/* POSITIONS */
 
-            font-size: 13px;
-        }
+.p1{grid-area:1/1;}
+.p2{grid-area:1/2;}
+.p3{grid-area:1/3;}
+.p4{grid-area:2/1;}
+.p5{grid-area:2/2;}
+.p6{grid-area:2/3;}
+.p7{grid-area:3/1;}
+.p8{grid-area:3/2;}
+.p9{grid-area:3/3;}
 
-        .score-top strong {
-            color: white;
+/* DICE ROLL */
 
-            font-size: 18px;
-        }
+.rolling{
+    animation:roll .18s infinite linear;
+}
 
+@keyframes roll{
 
-        /* =========================
-           MAIN
-        ========================= */
+    0%{
+        transform:rotate(0deg) scale(1);
+    }
 
-        .container {
+    50%{
+        transform:rotate(180deg) scale(.9);
+    }
 
-            min-height:
-                calc(100vh - 65px);
+    100%{
+        transform:rotate(360deg) scale(1);
+    }
 
-            display: flex;
+}
 
-            justify-content: center;
+/* COVER */
 
-            align-items: center;
+.cover{
+    position:absolute;
 
-            padding: 40px 20px;
+    width:120px;
+    height:120px;
 
-            position: relative;
+    background:#090909;
 
-            z-index: 2;
-        }
+    border:2px solid #ff8c00;
 
+    border-radius:18px;
 
-        .game {
+    display:flex;
+    justify-content:center;
+    align-items:center;
 
-            width: 100%;
+    color:#ff8c00;
 
-            max-width: 600px;
+    font-size:45px;
+    font-weight:bold;
 
-            text-align: center;
-        }
+    opacity:0;
+    visibility:hidden;
 
+    z-index:5;
 
-        /* =========================
-           HEADER
-        ========================= */
+    transition:opacity .15s ease;
+}
 
-        .game h1 {
+.cover.show{
+    opacity:1;
+    visibility:visible;
+}
 
-            color: #ff7b00;
+/* STATUS */
 
-            font-size:
-                clamp(35px, 8vw, 60px);
+.status{
+    margin-top:20px;
 
-            letter-spacing: 5px;
+    height:25px;
 
-            text-shadow:
-                0 0 8px #ff7b00,
-                0 0 20px
-                rgba(255,123,0,.5);
-        }
+    color:#888;
 
-        .subtitle {
+    font-size:13px;
+}
 
-            margin-top: 10px;
+/* GUESS */
 
-            color: #888;
+.guess-area{
+    margin-top:15px;
 
-            font-size: 12px;
+    width:100%;
 
-            line-height: 1.6;
-        }
+    opacity:.4;
 
+    pointer-events:none;
 
-        /* =========================
-           DICE AREA
-        ========================= */
+    transition:.2s;
+}
 
-        .dice-area {
+.guess-area.active{
+    opacity:1;
+    pointer-events:auto;
+}
 
-            width: 180px;
+.guess-title{
+    color:#aaa;
+    font-size:13px;
+    margin-bottom:12px;
+}
 
-            height: 180px;
+/* NUMBER BUTTONS */
 
-            margin: 40px auto 25px;
+.number-buttons{
+    display:grid;
 
-            position: relative;
+    grid-template-columns:repeat(6,1fr);
 
-            display: flex;
+    gap:7px;
 
-            justify-content: center;
+    max-width:350px;
 
-            align-items: center;
-        }
+    margin:auto;
+}
 
+.number-btn{
+    height:45px;
 
-        /* =========================
-           DICE
-        ========================= */
+    background:#0b0b0b;
 
-        .dice {
+    color:#ff8c00;
 
-            width: 130px;
+    border:1px solid #ff8c00;
 
-            height: 130px;
+    cursor:pointer;
 
-            background: white;
+    font-weight:bold;
 
-            border-radius: 18px;
+    transition:.15s;
+}
 
-            display: grid;
+.number-btn:hover{
+    background:#ff8c00;
+    color:#000;
+}
 
-            grid-template-columns:
-                repeat(3, 1fr);
+.number-btn.selected{
+    background:#ff8c00;
+    color:#000;
 
-            grid-template-rows:
-                repeat(3, 1fr);
+    box-shadow:0 0 12px rgba(255,140,0,.4);
+}
 
-            padding: 14px;
+/* GUESS BUTTON */
 
-            box-shadow:
-                0 0 25px
-                rgba(255,255,255,.25);
+.guess-btn{
+    margin-top:15px;
 
-            position: relative;
+    width:100%;
+    max-width:350px;
 
-            transform-style:
-                preserve-3d;
-        }
+    height:48px;
 
+    background:#ff8c00;
 
-        .dot {
+    color:#000;
 
-            width: 18px;
+    border:none;
 
-            height: 18px;
+    font-weight:bold;
 
-            background: #111;
+    letter-spacing:2px;
 
-            border-radius: 50%;
+    cursor:pointer;
 
-            justify-self: center;
+    transition:.15s;
+}
 
-            align-self: center;
+.guess-btn:hover{
+    box-shadow:0 0 15px rgba(255,140,0,.5);
+}
 
-            opacity: 0;
-        }
+.guess-btn:disabled{
+    opacity:.35;
+    cursor:not-allowed;
+}
 
+/* ROLL AGAIN */
 
-        /* POSISI DOT */
+.roll-btn{
+    margin-top:12px;
 
-        .p1 {
-            grid-column: 1;
-            grid-row: 1;
-        }
+    background:transparent;
 
-        .p2 {
-            grid-column: 2;
-            grid-row: 1;
-        }
+    color:#ff8c00;
 
-        .p3 {
-            grid-column: 3;
-            grid-row: 1;
-        }
+    border:1px solid #ff8c00;
 
-        .p4 {
-            grid-column: 1;
-            grid-row: 2;
-        }
+    padding:10px 20px;
 
-        .p5 {
-            grid-column: 2;
-            grid-row: 2;
-        }
+    cursor:pointer;
 
-        .p6 {
-            grid-column: 3;
-            grid-row: 2;
-        }
+    display:none;
+}
 
-        .p7 {
-            grid-column: 1;
-            grid-row: 3;
-        }
+/* RESULT */
 
-        .p8 {
-            grid-column: 2;
-            grid-row: 3;
-        }
+.result{
+    margin-top:12px;
 
-        .p9 {
-            grid-column: 3;
-            grid-row: 3;
-        }
+    min-height:22px;
 
+    font-size:14px;
 
-        /* =========================
-           DICE ANIMATION
-        ========================= */
+    font-weight:bold;
+}
 
-        .rolling {
+.correct{
+    color:#00ff88;
+}
 
-            animation:
-                diceRoll 0.35s
-                linear infinite;
-        }
+.wrong{
+    color:#ff4444;
+}
 
-        @keyframes diceRoll {
+/* HOME */
 
-            0% {
-                transform:
-                    rotate(0deg)
-                    rotateX(0deg)
-                    rotateY(0deg);
-            }
+.home-btn{
+    margin-top:auto;
 
-            25% {
-                transform:
-                    rotate(90deg)
-                    rotateX(90deg)
-                    rotateY(20deg);
-            }
+    padding-top:25px;
 
-            50% {
-                transform:
-                    rotate(180deg)
-                    rotateX(180deg)
-                    rotateY(90deg);
-            }
+    color:#666;
 
-            75% {
-                transform:
-                    rotate(270deg)
-                    rotateX(270deg)
-                    rotateY(180deg);
-            }
+    text-decoration:none;
 
-            100% {
-                transform:
-                    rotate(360deg)
-                    rotateX(360deg)
-                    rotateY(360deg);
-            }
-        }
+    font-size:13px;
 
+    letter-spacing:1px;
+}
 
-        /* =========================
-           COVER
-        ========================= */
+.home-btn:hover{
+    color:#ff8c00;
+}
 
-        .cover {
+/* MOBILE */
 
-            position: absolute;
+@media(max-width:400px){
 
-            width: 130px;
+    .game-container{
+        min-height:580px;
+    }
 
-            height: 130px;
+    .dice-area{
+        margin-top:25px;
+    }
 
-            border-radius: 18px;
+    .number-btn{
+        height:40px;
+    }
 
-            background:
-                repeating-linear-gradient(
-                    45deg,
-                    #111 0px,
-                    #111 8px,
-                    #191919 8px,
-                    #191919 16px
-                );
+}
 
-            border:
-                2px solid #ff7b00;
-
-            box-shadow:
-                0 0 20px
-                rgba(255,123,0,.35);
-
-            display: none;
-
-            justify-content: center;
-
-            align-items: center;
-
-            color: #ff7b00;
-
-            font-size: 28px;
-
-            font-weight: bold;
-
-            z-index: 5;
-        }
-
-        .cover::after {
-            content: "?";
-        }
-
-
-        /* =========================
-           RESULT
-        ========================= */
-
-        .result {
-
-            min-height: 25px;
-
-            color: #aaa;
-
-            font-size: 14px;
-
-            margin-bottom: 20px;
-        }
-
-        .result.correct {
-
-            color: #ff7b00;
-
-            text-shadow:
-                0 0 10px #ff7b00;
-        }
-
-        .result.wrong {
-
-            color: #aaa;
-        }
-
-
-        /* =========================
-           BUTTON
-        ========================= */
-
-        button {
-
-            font-family:
-                "Courier New",
-                monospace;
-
-            cursor: pointer;
-        }
-
-
-        .roll-btn {
-
-            padding: 13px 30px;
-
-            background: transparent;
-
-            color: #ff7b00;
-
-            border:
-                1px solid #ff7b00;
-
-            font-weight: bold;
-
-            letter-spacing: 1px;
-
-            transition: .25s;
-        }
-
-        .roll-btn:hover {
-
-            background: #ff7b00;
-
-            color: #000;
-
-            box-shadow:
-                0 0 20px #ff7b00;
-        }
-
-
-        /* =========================
-           GUESS AREA
-        ========================= */
-
-        .guess-area {
-
-            display: none;
-
-            margin-top: 20px;
-        }
-
-        .guess-title {
-
-            color: #888;
-
-            font-size: 12px;
-
-            margin-bottom: 12px;
-        }
-
-
-        .numbers {
-
-            display: flex;
-
-            justify-content: center;
-
-            gap: 8px;
-
-            flex-wrap: wrap;
-        }
-
-
-        .number-btn {
-
-            width: 48px;
-
-            height: 48px;
-
-            background: transparent;
-
-            border:
-                1px solid
-                rgba(255,123,0,.6);
-
-            color: #ff7b00;
-
-            font-size: 16px;
-
-            font-weight: bold;
-
-            transition: .2s;
-        }
-
-        .number-btn:hover {
-
-            background: #ff7b00;
-
-            color: #000;
-
-            box-shadow:
-                0 0 12px #ff7b00;
-        }
-
-        .number-btn.selected {
-
-            background: #ff7b00;
-
-            color: #000;
-
-            box-shadow:
-                0 0 15px #ff7b00;
-        }
-
-
-        .guess-btn {
-
-            margin-top: 18px;
-
-            padding: 11px 25px;
-
-            background: transparent;
-
-            border:
-                1px solid #ff7b00;
-
-            color: #ff7b00;
-
-            font-weight: bold;
-
-            display: none;
-        }
-
-        .guess-btn:hover {
-
-            background: #ff7b00;
-
-            color: #000;
-
-            box-shadow:
-                0 0 15px #ff7b00;
-        }
-
-
-        /* =========================
-           HOME BUTTON
-        ========================= */
-
-        .home-btn {
-
-            display: inline-block;
-
-            margin-top: 35px;
-
-            padding: 11px 22px;
-
-            border:
-                1px solid #ff7b00;
-
-            color: #ff7b00;
-
-            text-decoration: none;
-
-            font-size: 12px;
-
-            transition: .25s;
-        }
-
-        .home-btn:hover {
-
-            background: #ff7b00;
-
-            color: #000;
-
-            box-shadow:
-                0 0 15px #ff7b00;
-        }
-
-
-        /* =========================
-           MOBILE
-        ========================= */
-
-        @media (max-width: 650px) {
-
-            .topbar {
-
-                height: 58px;
-
-                padding:
-                    0 18px;
-            }
-
-            .title {
-
-                font-size: 14px;
-
-                letter-spacing: 2px;
-            }
-
-            .score-top {
-
-                font-size: 11px;
-            }
-
-            .score-top strong {
-
-                font-size: 16px;
-            }
-
-            .container {
-
-                min-height:
-                    calc(100vh - 58px);
-
-                padding:
-                    25px 15px;
-            }
-
-            .dice-area {
-
-                margin-top: 30px;
-            }
-
-            .dice {
-
-                width: 120px;
-
-                height: 120px;
-            }
-
-            .cover {
-
-                width: 120px;
-
-                height: 120px;
-            }
-
-            .number-btn {
-
-                width: 44px;
-
-                height: 44px;
-            }
-
-            .side.left {
-
-                left: 5px;
-            }
-
-            .side.right {
-
-                right: 5px;
-            }
-        }
-
-    </style>
+</style>
 </head>
-
 
 <body>
 
+<div class="game-container">
 
-    <!-- SIDE -->
+    <div class="title">
+        TEBAK DADU
+    </div>
 
-    <div class="side left"></div>
-    <div class="side right"></div>
+    <div class="subtitle">
+        &lt; GUESS THE HIDDEN NUMBER &gt;
+    </div>
 
 
-    <!-- TOP BAR -->
+    <div class="score-box">
+        SKOR
+        <div id="score">0</div>
+    </div>
 
-    <header class="topbar">
 
-        <div class="title">
-            [ TEBAK DADU ]
+    <!-- DICE -->
+
+    <div class="dice-area">
+
+        <div class="dice" id="dice">
+
+            <span class="dot p1"></span>
+            <span class="dot p2"></span>
+            <span class="dot p3"></span>
+
+            <span class="dot p4"></span>
+            <span class="dot p5"></span>
+            <span class="dot p6"></span>
+
+            <span class="dot p7"></span>
+            <span class="dot p8"></span>
+            <span class="dot p9"></span>
+
         </div>
 
-        <div class="score-top">
 
-            SKOR:
-            <strong id="score">
-                0
-            </strong>
+        <!-- COVER -->
+
+        <div class="cover" id="cover">
+            ?
+        </div>
+
+    </div>
+
+
+    <div class="status" id="status">
+        DADU SIAP...
+    </div>
+
+
+    <!-- GUESS -->
+
+    <div class="guess-area" id="guessArea">
+
+        <div class="guess-title">
+            PILIH ANGKA
+        </div>
+
+
+        <div class="number-buttons">
+
+            <button class="number-btn" data-number="1">1</button>
+            <button class="number-btn" data-number="2">2</button>
+            <button class="number-btn" data-number="3">3</button>
+            <button class="number-btn" data-number="4">4</button>
+            <button class="number-btn" data-number="5">5</button>
+            <button class="number-btn" data-number="6">6</button>
 
         </div>
 
-    </header>
 
+        <button class="guess-btn" id="guessBtn" disabled>
+            TEBAK
+        </button>
 
-    <!-- MAIN -->
+    </div>
 
-    <main class="container">
 
-        <section class="game">
+    <div class="result" id="result"></div>
 
 
-            <h1>
-                TEBAK DADU
-            </h1>
+    <button class="roll-btn" id="rollAgain">
+        🎲 ROLL LAGI
+    </button>
 
 
-            <div class="subtitle">
+    <a href="gamehub.html" class="home-btn" id="homeBtn">
+        ← BERANDA
+    </a>
 
-                Ingat angka yang muncul.<br>
-                Setelah dadu tertutup, tebak hasilnya.
+</div>
 
-            </div>
 
+<script>
 
-            <!-- DICE -->
+/* =========================
+   VARIABLES
+========================= */
 
-            <div class="dice-area">
+const dice = document.getElementById("dice");
+const cover = document.getElementById("cover");
 
-                <div
-                    class="dice"
-                    id="dice"
-                >
+const statusText = document.getElementById("status");
 
-                    <span class="dot p1"></span>
-                    <span class="dot p2"></span>
-                    <span class="dot p3"></span>
+const guessArea = document.getElementById("guessArea");
 
-                    <span class="dot p4"></span>
-                    <span class="dot p5"></span>
-                    <span class="dot p6"></span>
+const guessBtn = document.getElementById("guessBtn");
 
-                    <span class="dot p7"></span>
-                    <span class="dot p8"></span>
-                    <span class="dot p9"></span>
+const resultText = document.getElementById("result");
 
-                </div>
+const rollAgain = document.getElementById("rollAgain");
 
+const scoreDisplay = document.getElementById("score");
 
-                <!-- PENUTUP -->
+const numberButtons =
+    document.querySelectorAll(".number-btn");
 
-                <div
-                    class="cover"
-                    id="cover"
-                ></div>
 
-            </div>
+let score =
+    Number(localStorage.getItem("daduScore")) || 0;
 
+let diceResult = 1;
 
-            <!-- RESULT -->
+let selectedNumber = null;
 
-            <div
-                class="result"
-                id="result"
-            >
-                Klik KOCOK DADU untuk mulai.
-            </div>
+let rolling = false;
 
 
-            <!-- ROLL -->
+/* =========================
+   DICE FACES
+========================= */
 
-            <button
-                class="roll-btn"
-                id="rollBtn"
-            >
-                KOCOK DADU
-            </button>
+const faces = {
 
+    1:[5],
 
-            <!-- GUESS -->
+    2:[1,9],
 
-            <div
-                class="guess-area"
-                id="guessArea"
-            >
+    3:[1,5,9],
 
-                <div class="guess-title">
-                    TEBAK ANGKA:
-                </div>
+    4:[1,3,7,9],
 
+    5:[1,3,5,7,9],
 
-                <div class="numbers">
+    6:[1,3,4,6,7,9]
 
-                    <button
-                        class="number-btn"
-                        data-number="1"
-                    >
-                        1
-                    </button>
+};
 
-                    <button
-                        class="number-btn"
-                        data-number="2"
-                    >
-                        2
-                    </button>
 
-                    <button
-                        class="number-btn"
-                        data-number="3"
-                    >
-                        3
-                    </button>
+/* =========================
+   SHOW DICE
+========================= */
 
-                    <button
-                        class="number-btn"
-                        data-number="4"
-                    >
-                        4
-                    </button>
+function showDice(number){
 
-                    <button
-                        class="number-btn"
-                        data-number="5"
-                    >
-                        5
-                    </button>
+    const dots =
+        document.querySelectorAll(".dot");
 
-                    <button
-                        class="number-btn"
-                        data-number="6"
-                    >
-                        6
-                    </button>
+    dots.forEach((dot,index)=>{
 
-                </div>
+        const position = index + 1;
 
+        if(faces[number].includes(position)){
 
-                <button
-                    class="guess-btn"
-                    id="guessBtn"
-                >
-                    TEBAK
-                </button>
+            dot.style.opacity = "1";
 
-            </div>
+        }else{
 
-
-            <!-- HOME -->
-
-            <a
-                href="gamehub.html"
-                class="home-btn"
-                id="homeBtn"
-            >
-                ← BERANDA
-            </a>
-
-
-        </section>
-
-    </main>
-
-
-    <script>
-
-
-        /* =========================
-           ELEMENT
-        ========================= */
-
-        const dice =
-            document.getElementById("dice");
-
-        const cover =
-            document.getElementById("cover");
-
-        const rollBtn =
-            document.getElementById("rollBtn");
-
-        const guessArea =
-            document.getElementById("guessArea");
-
-        const guessBtn =
-            document.getElementById("guessBtn");
-
-        const result =
-            document.getElementById("result");
-
-        const scoreText =
-            document.getElementById("score");
-
-        const homeBtn =
-            document.getElementById("homeBtn");
-
-        const numberButtons =
-            document.querySelectorAll(
-                ".number-btn"
-            );
-
-
-        /* =========================
-           VARIABLES
-        ========================= */
-
-        let score = 0;
-
-        let diceResult = 0;
-
-        let selectedNumber = 0;
-
-        let rolling = false;
-
-
-        /* =========================
-           DICE PATTERN
-        ========================= */
-
-        const patterns = {
-
-            1: [5],
-
-            2: [1,9],
-
-            3: [1,5,9],
-
-            4: [1,3,7,9],
-
-            5: [1,3,5,7,9],
-
-            6: [1,3,4,6,7,9]
-
-        };
-
-
-        /* =========================
-           SHOW DICE
-        ========================= */
-
-        function showDice(number) {
-
-            const dots =
-                dice.querySelectorAll(".dot");
-
-            dots.forEach(dot => {
-
-                dot.style.opacity = "0";
-
-            });
-
-
-            patterns[number].forEach(
-                position => {
-
-                    dots[position - 1]
-                        .style.opacity = "1";
-
-                }
-            );
+            dot.style.opacity = "0";
 
         }
 
+    });
 
-        /* =========================
-           RANDOM DICE
-        ========================= */
+}
 
-        function randomDice() {
 
-            return Math.floor(
-                Math.random() * 6
-            ) + 1;
+/* =========================
+   SCORE
+========================= */
 
-        }
+function updateScore(){
 
+    scoreDisplay.textContent = score;
 
-        /* =========================
-           ROLL
-        ========================= */
+    localStorage.setItem(
+        "daduScore",
+        score
+    );
 
-        rollBtn.addEventListener(
-            "click",
-            () => {
+}
 
-                if (rolling) return;
 
-                rolling = true;
+/* =========================
+   RESET GUESS
+========================= */
 
-                selectedNumber = 0;
+function resetGuess(){
 
-                guessArea.style.display =
-                    "none";
+    selectedNumber = null;
 
-                guessBtn.style.display =
-                    "none";
+    numberButtons.forEach(btn=>{
+        btn.classList.remove("selected");
+    });
 
-                cover.style.display =
-                    "none";
+    guessBtn.disabled = true;
 
-                result.textContent =
-                    "Dadu sedang dikocok...";
+}
 
-                result.className =
-                    "result";
 
-                numberButtons.forEach(
-                    btn => {
+/* =========================
+   ROLL DICE
+========================= */
 
-                        btn.classList.remove(
-                            "selected"
-                        );
+function rollDice(){
 
-                    }
-                );
+    if(rolling) return;
 
+    rolling = true;
 
-                /* RANDOM HASIL */
+    guessArea.classList.remove("active");
 
-                diceResult =
-                    randomDice();
+    resultText.textContent = "";
 
+    resultText.className = "result";
 
-                /* ANIMASI */
+    rollAgain.style.display = "none";
 
-                dice.classList.add(
-                    "rolling"
-                );
+    resetGuess();
 
+    /* HIDE COVER */
 
-                /* Ganti angka selama muter */
+    cover.classList.remove("show");
 
-                const animation =
-                    setInterval(() => {
 
-                        showDice(
-                            randomDice()
-                        );
+    /* RANDOM FINAL RESULT */
 
-                    }, 120);
+    diceResult =
+        Math.floor(Math.random()*6)+1;
 
 
-                /* SELESAI 2 DETIK */
+    /* START ANIMATION */
 
-                setTimeout(() => {
+    dice.classList.add("rolling");
 
-                    clearInterval(
-                        animation
-                    );
+    statusText.textContent =
+        "DADING MUTER...";
 
-                    dice.classList.remove(
-                        "rolling"
-                    );
 
+    /*
+       1 DETIK
+       COVER MENUTUP DADU
+    */
 
-                    /* TAMPILKAN HASIL ASLI */
+    setTimeout(()=>{
 
-                    showDice(
-                        diceResult
-                    );
+        cover.classList.add("show");
 
+        statusText.textContent =
+            "HASIL TERSEMBUNYI...";
 
-                    result.textContent =
-                        "Ingat angka ini!";
+    },1000);
 
-                    rolling = false;
 
+    /*
+       2 DETIK
+       DADU BERHENTI
+    */
 
-                    /*
-                        TUNGGU SEBENTAR
-                        LALU TUTUP
-                    */
+    setTimeout(()=>{
 
-                    setTimeout(() => {
+        dice.classList.remove("rolling");
 
-                        cover.style.display =
-                            "flex";
+        /*
+           HASIL TETAP DISET,
+           TAPI TERTUTUP COVER
+        */
 
-                        guessArea.style.display =
-                            "block";
+        showDice(diceResult);
 
-                        rollBtn.style.display =
-                            "none";
+        statusText.textContent =
+            "PILIH ANGKA DAN TEBAK";
 
-                        result.textContent =
-                            "Pilih angka yang lu ingat.";
+        guessArea.classList.add("active");
 
-                    }, 600);
+        rolling = false;
 
+    },2000);
 
-                }, 2000);
+}
 
-            }
-        );
 
+/* =========================
+   NUMBER SELECT
+========================= */
 
-        /* =========================
-           SELECT NUMBER
-        ========================= */
+numberButtons.forEach(btn=>{
 
-        numberButtons.forEach(
-            button => {
+    btn.addEventListener("click",()=>{
 
-                button.addEventListener(
-                    "click",
-                    () => {
+        if(rolling) return;
 
-                        selectedNumber =
-                            Number(
-                                button.dataset.number
-                            );
+        selectedNumber =
+            Number(btn.dataset.number);
 
 
-                        numberButtons.forEach(
-                            btn => {
+        numberButtons.forEach(b=>{
+            b.classList.remove("selected");
+        });
 
-                                btn.classList.remove(
-                                    "selected"
-                                );
 
-                            }
-                        );
+        btn.classList.add("selected");
 
+        guessBtn.disabled = false;
 
-                        button.classList.add(
-                            "selected"
-                        );
+    });
 
+});
 
-                        guessBtn.style.display =
-                            "inline-block";
 
-                    }
-                );
+/* =========================
+   GUESS
+========================= */
 
-            }
-        );
+guessBtn.addEventListener("click",()=>{
 
+    if(
+        selectedNumber === null ||
+        rolling
+    ) return;
 
-        /* =========================
-           GUESS
-        ========================= */
 
-        guessBtn.addEventListener(
-            "click",
-            () => {
+    if(selectedNumber === diceResult){
 
-                if (!selectedNumber) {
+        score += 10;
 
-                    return;
+        resultText.textContent =
+            "✓ BENAR! +10";
 
-                }
+        resultText.className =
+            "result correct";
 
+    }else{
 
-                /* BUKA KOTAK */
+        score -= 2;
 
-                cover.style.display =
-                    "none";
+        resultText.textContent =
+            "✕ SALAH! -2";
 
+        resultText.className =
+            "result wrong";
 
-                if (
-                    selectedNumber ===
-                    diceResult
-                ) {
+    }
 
-                    score += 10;
 
-                    result.textContent =
-                        "✓ BENAR! +10";
+    updateScore();
 
-                    result.className =
-                        "result correct";
+    guessArea.classList.remove("active");
 
-                } else {
+    guessBtn.disabled = true;
 
-                    score -= 2;
+    rollAgain.style.display =
+        "inline-block";
 
-                    result.textContent =
-                        "✕ SALAH! Hasilnya " +
-                        diceResult +
-                        " (-2)";
+});
 
-                    result.className =
-                        "result wrong";
 
-                }
+/* =========================
+   ROLL AGAIN
+========================= */
 
+rollAgain.addEventListener(
+    "click",
+    rollDice
+);
 
-                scoreText.textContent =
-                    score;
 
+/* =========================
+   HOME
+========================= */
 
-                /* SIMPAN SKOR */
+document
+.getElementById("homeBtn")
+.addEventListener("click",()=>{
 
-                localStorage.setItem(
-                    "daduScore",
-                    score
-                );
+    updateScore();
 
+});
 
-                /* RESET */
 
-                guessArea.style.display =
-                    "none";
+/* =========================
+   START
+========================= */
 
-                guessBtn.style.display =
-                    "none";
+updateScore();
 
-                rollBtn.style.display =
-                    "inline-block";
+showDice(1);
 
-                rollBtn.textContent =
-                    "KOCOK LAGI";
+setTimeout(()=>{
+    rollDice();
+},500);
 
-                selectedNumber = 0;
-
-
-                numberButtons.forEach(
-                    btn => {
-
-                        btn.classList.remove(
-                            "selected"
-                        );
-
-                    }
-                );
-
-            }
-        );
-
-
-        /* =========================
-           LOAD SCORE
-        ========================= */
-
-        const savedScore =
-            localStorage.getItem(
-                "daduScore"
-            );
-
-
-        if (savedScore !== null) {
-
-            score =
-                Number(savedScore);
-
-            scoreText.textContent =
-                score;
-
-        }
-
-
-        /* =========================
-           BERANDA
-        ========================= */
-
-        homeBtn.addEventListener(
-            "click",
-            () => {
-
-                /*
-                   Pastikan skor terakhir
-                   tersimpan sebelum keluar.
-                */
-
-                localStorage.setItem(
-                    "daduScore",
-                    score
-                );
-
-            }
-        );
-
-
-        /* =========================
-           INITIAL DICE
-        ========================= */
-
-        showDice(1);
-
-    </script>
+</script>
 
 </body>
 </html>
