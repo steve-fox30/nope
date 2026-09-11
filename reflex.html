@@ -1,0 +1,731 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <title>REFLEX - MINI GAME</title>
+
+    <style>
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        body {
+            min-height: 100vh;
+            background:
+                linear-gradient(rgba(0,0,0,.82), rgba(0,0,0,.92)),
+                url("fox.webp") center/cover fixed no-repeat;
+
+            color: white;
+            font-family: "Courier New", monospace;
+            overflow: hidden;
+        }
+
+        /* =========================
+           SIDE LINE
+        ========================= */
+
+        .side {
+            position: fixed;
+            top: 0;
+            bottom: 0;
+            width: 2px;
+            background: #ff7b00;
+            box-shadow: 0 0 15px #ff7b00;
+            z-index: 20;
+        }
+
+        .side.left {
+            left: 12px;
+        }
+
+        .side.right {
+            right: 12px;
+        }
+
+        /* =========================
+           TOP BAR
+        ========================= */
+
+        .topbar {
+            height: 65px;
+
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+
+            padding: 0 30px;
+
+            background: rgba(0,0,0,.9);
+            border-bottom: 1px solid #ff7b00;
+
+            position: relative;
+            z-index: 10;
+        }
+
+        .title {
+            color: #ff7b00;
+            font-size: 20px;
+            font-weight: bold;
+            letter-spacing: 3px;
+        }
+
+        .timer {
+            color: white;
+            font-size: 20px;
+            font-weight: bold;
+        }
+
+        .timer.warning {
+            color: #ff7b00;
+            text-shadow: 0 0 10px #ff7b00;
+        }
+
+        /* =========================
+           GAME AREA
+        ========================= */
+
+        .game-area {
+            position: relative;
+
+            width: 100%;
+            height: calc(100vh - 65px);
+
+            overflow: hidden;
+        }
+
+        /* =========================
+           INFO
+        ========================= */
+
+        .info {
+            position: absolute;
+            top: 20px;
+            left: 50%;
+            transform: translateX(-50%);
+
+            text-align: center;
+
+            z-index: 5;
+            pointer-events: none;
+        }
+
+        .info h1 {
+            color: #ff7b00;
+            font-size: clamp(30px, 7vw, 55px);
+
+            letter-spacing: 5px;
+
+            text-shadow:
+                0 0 8px #ff7b00,
+                0 0 20px rgba(255,123,0,.5);
+        }
+
+        .info p {
+            margin-top: 8px;
+            color: #888;
+            font-size: 12px;
+        }
+
+        .score-box {
+            margin-top: 10px;
+            color: #aaa;
+            font-size: 13px;
+        }
+
+        .score-box strong {
+            color: white;
+            font-size: 18px;
+        }
+
+        /* =========================
+           TARGET
+        ========================= */
+
+        .target {
+            position: absolute;
+
+            width: 65px;
+            height: 65px;
+
+            border: 2px solid #ff7b00;
+
+            background: rgba(255,123,0,.12);
+
+            box-shadow:
+                0 0 10px #ff7b00,
+                inset 0 0 15px rgba(255,123,0,.15);
+
+            cursor: pointer;
+
+            display: none;
+
+            align-items: center;
+            justify-content: center;
+
+            color: #ff7b00;
+
+            font-size: 25px;
+            font-weight: bold;
+
+            user-select: none;
+
+            transition: transform .08s;
+        }
+
+        .target::before {
+            content: "+";
+        }
+
+        .target:hover {
+            background: rgba(255,123,0,.25);
+        }
+
+        .target:active {
+            transform: scale(.8);
+        }
+
+        /* =========================
+           START SCREEN
+        ========================= */
+
+        .start-screen {
+            position: absolute;
+            inset: 0;
+
+            display: flex;
+            justify-content: center;
+            align-items: center;
+
+            background: rgba(0,0,0,.45);
+
+            z-index: 8;
+        }
+
+        .start-box {
+            text-align: center;
+            padding: 35px;
+
+            border: 1px solid #ff7b00;
+
+            background: rgba(0,0,0,.8);
+
+            box-shadow:
+                0 0 25px rgba(255,123,0,.25);
+        }
+
+        .start-box h2 {
+            color: #ff7b00;
+            font-size: 30px;
+            letter-spacing: 4px;
+        }
+
+        .start-box p {
+            color: #888;
+            margin-top: 12px;
+            font-size: 13px;
+            line-height: 1.7;
+        }
+
+        .start-btn {
+            margin-top: 22px;
+
+            padding: 12px 30px;
+
+            background: transparent;
+
+            border: 1px solid #ff7b00;
+
+            color: #ff7b00;
+
+            font-family: inherit;
+            font-weight: bold;
+
+            cursor: pointer;
+
+            transition: .25s;
+        }
+
+        .start-btn:hover {
+            background: #ff7b00;
+            color: #000;
+
+            box-shadow: 0 0 20px #ff7b00;
+        }
+
+        /* =========================
+           GAME OVER
+        ========================= */
+
+        .game-over {
+            position: absolute;
+            inset: 0;
+
+            display: none;
+
+            justify-content: center;
+            align-items: center;
+
+            background: rgba(0,0,0,.75);
+
+            z-index: 9;
+        }
+
+        .over-box {
+            text-align: center;
+
+            padding: 35px;
+
+            border: 1px solid #ff7b00;
+
+            background: rgba(0,0,0,.9);
+
+            box-shadow: 0 0 30px rgba(255,123,0,.25);
+        }
+
+        .over-box h2 {
+            color: #ff7b00;
+            font-size: 32px;
+            letter-spacing: 3px;
+        }
+
+        .final-score {
+            margin-top: 15px;
+            color: #aaa;
+        }
+
+        .final-score strong {
+            display: block;
+
+            margin-top: 5px;
+
+            color: white;
+            font-size: 40px;
+        }
+
+        .buttons {
+            margin-top: 25px;
+
+            display: flex;
+            gap: 10px;
+
+            justify-content: center;
+            flex-wrap: wrap;
+        }
+
+        .buttons a,
+        .buttons button {
+            padding: 10px 18px;
+
+            border: 1px solid #ff7b00;
+
+            background: transparent;
+
+            color: #ff7b00;
+
+            text-decoration: none;
+
+            font-family: inherit;
+            font-weight: bold;
+
+            cursor: pointer;
+        }
+
+        .buttons a:hover,
+        .buttons button:hover {
+            background: #ff7b00;
+            color: #000;
+
+            box-shadow: 0 0 15px #ff7b00;
+        }
+
+        /* =========================
+           MOBILE
+        ========================= */
+
+        @media (max-width: 650px) {
+
+            .topbar {
+                height: 58px;
+                padding: 0 18px;
+            }
+
+            .title {
+                font-size: 14px;
+            }
+
+            .timer {
+                font-size: 17px;
+            }
+
+            .game-area {
+                height: calc(100vh - 58px);
+            }
+
+            .info {
+                top: 15px;
+            }
+
+            .info h1 {
+                letter-spacing: 3px;
+            }
+
+            .target {
+                width: 60px;
+                height: 60px;
+            }
+
+            .side.left {
+                left: 5px;
+            }
+
+            .side.right {
+                right: 5px;
+            }
+        }
+    </style>
+</head>
+
+<body>
+
+    <!-- SIDE LINE -->
+
+    <div class="side left"></div>
+    <div class="side right"></div>
+
+
+    <!-- TOP BAR -->
+
+    <header class="topbar">
+
+        <div class="title">
+            [ REFLEX ]
+        </div>
+
+        <div class="timer" id="timer">
+            1:30
+        </div>
+
+    </header>
+
+
+    <!-- GAME AREA -->
+
+    <main class="game-area">
+
+        <!-- INFO -->
+
+        <div class="info">
+
+            <h1>REFLEX</h1>
+
+            <p>
+                KLIK TARGET SECEPAT MUNGKIN
+            </p>
+
+            <div class="score-box">
+                SKOR:
+                <strong id="score">0</strong>
+            </div>
+
+        </div>
+
+
+        <!-- TARGET -->
+
+        <div class="target" id="target"></div>
+
+
+        <!-- START SCREEN -->
+
+        <div class="start-screen" id="startScreen">
+
+            <div class="start-box">
+
+                <h2>READY?</h2>
+
+                <p>
+                    Target akan muncul secara acak.<br>
+                    Setiap target yang berhasil diklik<br>
+                    akan menambah +1 skor.
+                    <br><br>
+                    WAKTU: 1:30
+                </p>
+
+                <button class="start-btn" id="startBtn">
+                    MULAI GAME
+                </button>
+
+            </div>
+
+        </div>
+
+
+        <!-- GAME OVER -->
+
+        <div class="game-over" id="gameOver">
+
+            <div class="over-box">
+
+                <h2>TIME'S UP</h2>
+
+                <div class="final-score">
+
+                    SKOR AKHIR
+
+                    <strong id="finalScore">
+                        0
+                    </strong>
+
+                </div>
+
+                <div class="buttons">
+
+                    <button id="retryBtn">
+                        MAIN LAGI
+                    </button>
+
+                    <a href="gamehub.html">
+                        ← BERANDA
+                    </a>
+
+                </div>
+
+            </div>
+
+        </div>
+
+    </main>
+
+
+    <script>
+
+        /* =========================
+           ELEMENT
+        ========================= */
+
+        const startBtn =
+            document.getElementById("startBtn");
+
+        const retryBtn =
+            document.getElementById("retryBtn");
+
+        const target =
+            document.getElementById("target");
+
+        const scoreText =
+            document.getElementById("score");
+
+        const timerText =
+            document.getElementById("timer");
+
+        const startScreen =
+            document.getElementById("startScreen");
+
+        const gameOver =
+            document.getElementById("gameOver");
+
+        const finalScore =
+            document.getElementById("finalScore");
+
+
+        /* =========================
+           VARIABLES
+        ========================= */
+
+        let score = 0;
+
+        let timeLeft = 90;
+
+        let gameRunning = false;
+
+        let timerInterval;
+
+        let targetTimeout;
+
+
+        /* =========================
+           RANDOM TARGET
+        ========================= */
+
+        function moveTarget() {
+
+            if (!gameRunning) return;
+
+            const area =
+                document.querySelector(".game-area");
+
+            const targetSize = 65;
+
+            const maxX =
+                area.clientWidth - targetSize - 10;
+
+            const maxY =
+                area.clientHeight - targetSize - 10;
+
+            const minY = 120;
+
+            const x =
+                Math.random() * maxX;
+
+            const y =
+                minY +
+                Math.random() *
+                Math.max(0, maxY - minY);
+
+            target.style.left = x + "px";
+            target.style.top = y + "px";
+
+            target.style.display = "flex";
+
+
+            /* Target berikutnya */
+
+            const delay =
+                500 +
+                Math.random() * 700;
+
+            clearTimeout(targetTimeout);
+
+            targetTimeout =
+                setTimeout(moveTarget, delay);
+        }
+
+
+        /* =========================
+           CLICK TARGET
+        ========================= */
+
+        target.addEventListener("click", function () {
+
+            if (!gameRunning) return;
+
+            score++;
+
+            scoreText.textContent = score;
+
+            moveTarget();
+
+        });
+
+
+        /* =========================
+           START GAME
+        ========================= */
+
+        function startGame() {
+
+            clearInterval(timerInterval);
+            clearTimeout(targetTimeout);
+
+            score = 0;
+            timeLeft = 90;
+
+            scoreText.textContent = "0";
+            timerText.textContent = "1:30";
+
+            timerText.classList.remove("warning");
+
+            gameRunning = true;
+
+            startScreen.style.display = "none";
+            gameOver.style.display = "none";
+
+            moveTarget();
+
+
+            /* TIMER */
+
+            timerInterval =
+                setInterval(() => {
+
+                    timeLeft--;
+
+                    const minutes =
+                        Math.floor(timeLeft / 60);
+
+                    const seconds =
+                        timeLeft % 60;
+
+                    timerText.textContent =
+                        minutes +
+                        ":" +
+                        String(seconds).padStart(2, "0");
+
+
+                    if (timeLeft <= 10) {
+
+                        timerText.classList.add("warning");
+
+                    }
+
+
+                    if (timeLeft <= 0) {
+
+                        endGame();
+
+                    }
+
+                }, 1000);
+
+        }
+
+
+        /* =========================
+           END GAME
+        ========================= */
+
+        function endGame() {
+
+            gameRunning = false;
+
+            clearInterval(timerInterval);
+            clearTimeout(targetTimeout);
+
+            target.style.display = "none";
+
+            finalScore.textContent = score;
+
+            gameOver.style.display = "flex";
+
+
+            /* SIMPAN SKOR */
+
+            const oldScore =
+                Number(
+                    localStorage.getItem("reflexScore") || 0
+                );
+
+            if (score > oldScore) {
+
+                localStorage.setItem(
+                    "reflexScore",
+                    score
+                );
+
+            }
+
+        }
+
+
+        /* =========================
+           BUTTON
+        ========================= */
+
+        startBtn.addEventListener(
+            "click",
+            startGame
+        );
+
+        retryBtn.addEventListener(
+            "click",
+            startGame
+        );
+
+    </script>
+
+</body>
+</html>
