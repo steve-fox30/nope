@@ -1,0 +1,924 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+<title>MEMORY NUMBER</title>
+
+<style>
+
+*{
+    box-sizing:border-box;
+    margin:0;
+    padding:0;
+}
+
+body{
+    min-height:100vh;
+    background:
+        radial-gradient(circle at center, #191919 0%, #080808 55%, #000 100%);
+    color:white;
+    font-family:monospace;
+    display:flex;
+    justify-content:center;
+    align-items:center;
+    padding:20px;
+}
+
+/* =========================
+   CONTAINER
+========================= */
+
+.game{
+    width:min(620px,100%);
+    text-align:center;
+}
+
+.logo{
+    font-size:45px;
+    margin-bottom:5px;
+    filter:drop-shadow(0 0 10px #ff7300);
+}
+
+h1{
+    color:#ff7300;
+    letter-spacing:4px;
+    font-size:clamp(25px,7vw,40px);
+    text-shadow:0 0 12px #ff7300;
+}
+
+.subtitle{
+    color:#777;
+    font-size:12px;
+    margin-top:8px;
+}
+
+/* =========================
+   INFO
+========================= */
+
+.info{
+    display:flex;
+    justify-content:space-between;
+    gap:10px;
+    margin-top:25px;
+}
+
+.info-box{
+    flex:1;
+    border:1px solid rgba(255,115,0,.5);
+    background:#080808;
+    padding:11px 5px;
+    font-size:12px;
+}
+
+.info-box span{
+    display:block;
+    color:#ff7300;
+    font-size:18px;
+    margin-top:5px;
+}
+
+/* =========================
+   STATUS
+========================= */
+
+.status{
+    min-height:55px;
+    margin-top:18px;
+    display:flex;
+    justify-content:center;
+    align-items:center;
+    color:#ff7300;
+    font-size:15px;
+    line-height:1.5;
+}
+
+.countdown{
+    font-size:24px;
+    text-shadow:0 0 10px #ff7300;
+}
+
+/* =========================
+   GRID
+========================= */
+
+.grid{
+    display:grid;
+    grid-template-columns:repeat(4,1fr);
+    gap:10px;
+    margin-top:10px;
+}
+
+/* =========================
+   CARD
+========================= */
+
+.card{
+    aspect-ratio:1 / 1;
+    perspective:700px;
+    cursor:pointer;
+    user-select:none;
+}
+
+.card-inner{
+    position:relative;
+    width:100%;
+    height:100%;
+    transition:transform .45s;
+    transform-style:preserve-3d;
+}
+
+.card.flipped .card-inner{
+    transform:rotateY(180deg);
+}
+
+.card-front,
+.card-back{
+    position:absolute;
+    width:100%;
+    height:100%;
+    border:1px solid #ff7300;
+    display:flex;
+    justify-content:center;
+    align-items:center;
+    backface-visibility:hidden;
+    border-radius:5px;
+}
+
+/* bagian tertutup */
+
+.card-front{
+    background:
+        linear-gradient(135deg,#070707,#161616);
+    color:#ff7300;
+    font-size:25px;
+    box-shadow:
+        inset 0 0 15px rgba(255,115,0,.08),
+        0 0 7px rgba(255,115,0,.1);
+}
+
+.card-front::after{
+    content:"?";
+}
+
+/* angka */
+
+.card-back{
+    background:#ff7300;
+    color:#000;
+    transform:rotateY(180deg);
+    font-size:clamp(22px,7vw,36px);
+    font-weight:bold;
+    box-shadow:0 0 16px rgba(255,115,0,.4);
+}
+
+/* kartu benar */
+
+.card.correct{
+    cursor:default;
+}
+
+.card.correct .card-back{
+    background:#1f1f1f;
+    color:#ff7300;
+    border:1px solid #ff7300;
+}
+
+/* kartu yang salah */
+
+.card.wrong .card-back{
+    background:#3a0909;
+    color:#ff5252;
+    border-color:#ff5252;
+}
+
+/* =========================
+   RESULT SCREEN
+========================= */
+
+.result-screen{
+    display:none;
+    margin-top:25px;
+    border:1px solid #ff7300;
+    background:#070707;
+    padding:25px 15px;
+    box-shadow:0 0 20px rgba(255,115,0,.15);
+}
+
+.result-icon{
+    font-size:50px;
+}
+
+.result-title{
+    margin-top:10px;
+    color:#ff7300;
+    font-size:25px;
+    letter-spacing:3px;
+}
+
+.result-text{
+    margin-top:12px;
+    color:#aaa;
+    line-height:1.7;
+}
+
+.final-score{
+    color:#ff7300;
+    font-size:25px;
+    margin-top:15px;
+}
+
+/* =========================
+   BUTTONS
+========================= */
+
+.controls{
+    margin-top:20px;
+    display:flex;
+    justify-content:center;
+    gap:10px;
+    flex-wrap:wrap;
+}
+
+button{
+    border:1px solid #ff7300;
+    background:transparent;
+    color:#ff7300;
+    padding:11px 18px;
+    font-family:monospace;
+    font-weight:bold;
+    cursor:pointer;
+    transition:.2s;
+}
+
+button:hover{
+    background:#ff7300;
+    color:#000;
+    box-shadow:0 0 12px #ff7300;
+}
+
+/* =========================
+   MOBILE
+========================= */
+
+@media(max-width:500px){
+
+    body{
+        padding:12px;
+        align-items:flex-start;
+    }
+
+    .game{
+        margin-top:15px;
+    }
+
+    .grid{
+        gap:7px;
+    }
+
+    .info{
+        gap:6px;
+    }
+
+    .info-box{
+        font-size:10px;
+    }
+
+    .info-box span{
+        font-size:15px;
+    }
+
+}
+
+</style>
+</head>
+
+<body>
+
+<div class="game">
+
+    <div class="logo">
+        🧠
+    </div>
+
+    <h1>MEMORY NUMBER</h1>
+
+    <div class="subtitle">
+        &gt; INGAT POSISINYA_
+    </div>
+
+
+    <!-- INFO -->
+
+    <div class="info">
+
+        <div class="info-box">
+            TARGET
+            <span id="targetDisplay">1</span>
+        </div>
+
+        <div class="info-box">
+            NYAWA
+            <span id="livesDisplay">❤️ 7</span>
+        </div>
+
+        <div class="info-box">
+            SCORE
+            <span id="scoreDisplay">0</span>
+        </div>
+
+    </div>
+
+
+    <!-- STATUS -->
+
+    <div class="status" id="status">
+        Bersiap...
+    </div>
+
+
+    <!-- GRID -->
+
+    <div class="grid" id="grid"></div>
+
+
+    <!-- RESULT -->
+
+    <div class="result-screen" id="resultScreen">
+
+        <div class="result-icon" id="resultIcon">
+            🦊
+        </div>
+
+        <div class="result-title" id="resultTitle">
+            SELESAI
+        </div>
+
+        <div class="result-text" id="resultText">
+        </div>
+
+        <div class="final-score">
+            SCORE :
+            <span id="finalScore">0</span>
+        </div>
+
+        <div class="controls">
+
+            <button onclick="startGame()">
+                MAIN LAGI
+            </button>
+
+            <button onclick="goHome()">
+                ← BERANDA
+            </button>
+
+        </div>
+
+    </div>
+
+</div>
+
+
+<script>
+
+/* ======================================
+   VARIABLE
+====================================== */
+
+const grid = document.getElementById("grid");
+
+const targetDisplay =
+    document.getElementById("targetDisplay");
+
+const livesDisplay =
+    document.getElementById("livesDisplay");
+
+const scoreDisplay =
+    document.getElementById("scoreDisplay");
+
+const statusText =
+    document.getElementById("status");
+
+const resultScreen =
+    document.getElementById("resultScreen");
+
+const resultIcon =
+    document.getElementById("resultIcon");
+
+const resultTitle =
+    document.getElementById("resultTitle");
+
+const resultText =
+    document.getElementById("resultText");
+
+const finalScore =
+    document.getElementById("finalScore");
+
+
+let numbers = [];
+
+let target = 1;
+
+let lives = 7;
+
+let score = 0;
+
+let gameActive = false;
+
+let canClick = false;
+
+
+/* ======================================
+   SHUFFLE
+====================================== */
+
+function shuffle(array){
+
+    for(
+        let i = array.length - 1;
+        i > 0;
+        i--
+    ){
+
+        const j =
+            Math.floor(
+                Math.random() * (i + 1)
+            );
+
+        [
+            array[i],
+            array[j]
+        ] = [
+            array[j],
+            array[i]
+        ];
+
+    }
+
+    return array;
+}
+
+
+/* ======================================
+   CREATE CARDS
+====================================== */
+
+function createCards(){
+
+    grid.innerHTML = "";
+
+    numbers =
+        shuffle([
+            1,2,3,4,
+            5,6,7,8,
+            9,10,11,12
+        ]);
+
+    numbers.forEach(number => {
+
+        const card =
+            document.createElement("div");
+
+        card.className =
+            "card flipped";
+
+        card.dataset.number =
+            number;
+
+        card.innerHTML = `
+
+            <div class="card-inner">
+
+                <div class="card-front">
+                </div>
+
+                <div class="card-back">
+                    ${number}
+                </div>
+
+            </div>
+
+        `;
+
+        card.addEventListener(
+            "click",
+            () => handleCard(card)
+        );
+
+        grid.appendChild(card);
+
+    });
+
+}
+
+
+/* ======================================
+   START GAME
+====================================== */
+
+function startGame(){
+
+    target = 1;
+
+    lives = 7;
+
+    score = 0;
+
+    gameActive = true;
+
+    canClick = false;
+
+    resultScreen.style.display =
+        "none";
+
+    grid.style.display =
+        "grid";
+
+    updateUI();
+
+    createCards();
+
+    startMemoryTimer();
+
+}
+
+
+/* ======================================
+   MEMORY 3 SECONDS
+====================================== */
+
+function startMemoryTimer(){
+
+    let time = 3;
+
+    statusText.innerHTML =
+        `<span class="countdown">
+            HAFALKAN! ${time}
+        </span>`;
+
+    const timer =
+        setInterval(() => {
+
+            time--;
+
+            if(time > 0){
+
+                statusText.innerHTML =
+                    `<span class="countdown">
+                        HAFALKAN! ${time}
+                    </span>`;
+
+            }else{
+
+                clearInterval(timer);
+
+                hideCards();
+
+            }
+
+        },1000);
+
+}
+
+
+/* ======================================
+   HIDE ALL CARDS
+====================================== */
+
+function hideCards(){
+
+    document
+        .querySelectorAll(".card")
+        .forEach(card => {
+
+            card.classList.remove(
+                "flipped"
+            );
+
+        });
+
+    statusText.innerHTML =
+        `CARI ANGKA <b>1</b>`;
+
+    canClick = true;
+
+}
+
+
+/* ======================================
+   CARD CLICK
+====================================== */
+
+function handleCard(card){
+
+    if(!gameActive){
+        return;
+    }
+
+    if(!canClick){
+        return;
+    }
+
+    if(
+        card.classList.contains(
+            "correct"
+        )
+    ){
+        return;
+    }
+
+
+    const number =
+        Number(card.dataset.number);
+
+
+    /* =========================
+       BENAR
+    ========================= */
+
+    if(number === target){
+
+        card.classList.add(
+            "flipped",
+            "correct"
+        );
+
+        score += 10;
+
+        target++;
+
+        updateUI();
+
+
+        /* SEMUA SELESAI */
+
+        if(target > 12){
+
+            winGame();
+
+            return;
+
+        }
+
+
+        statusText.innerHTML =
+            `BENAR ✓ &nbsp; CARI ANGKA <b>${target}</b>`;
+
+    }
+
+
+    /* =========================
+       SALAH
+    ========================= */
+
+    else{
+
+        canClick = false;
+
+        card.classList.add(
+            "flipped",
+            "wrong"
+        );
+
+        lives--;
+
+        score--;
+
+        if(score < 0){
+            score = 0;
+        }
+
+        updateUI();
+
+
+        statusText.innerHTML =
+            `SALAH ✕ &nbsp; TARGET MASIH <b>${target}</b>`;
+
+
+        /* NYAWA HABIS */
+
+        if(lives <= 0){
+
+            setTimeout(() => {
+
+                gameOver();
+
+            },700);
+
+            return;
+
+        }
+
+
+        /* TUTUP KARTU SALAH */
+
+        setTimeout(() => {
+
+            card.classList.remove(
+                "flipped",
+                "wrong"
+            );
+
+            canClick = true;
+
+            statusText.innerHTML =
+                `CARI ANGKA <b>${target}</b>`;
+
+        },700);
+
+    }
+
+}
+
+
+/* ======================================
+   UPDATE UI
+====================================== */
+
+function updateUI(){
+
+    targetDisplay.textContent =
+        target > 12
+            ? "✓"
+            : target;
+
+    livesDisplay.textContent =
+        "❤️ " + lives;
+
+    scoreDisplay.textContent =
+        score;
+
+}
+
+
+/* ======================================
+   WIN
+====================================== */
+
+function winGame(){
+
+    gameActive = false;
+
+    canClick = false;
+
+
+    /* BONUS SISA NYAWA */
+
+    const bonus =
+        lives * 5;
+
+    score += bonus;
+
+    updateUI();
+
+
+    saveBestScore();
+
+
+    setTimeout(() => {
+
+        grid.style.display =
+            "none";
+
+        statusText.innerHTML =
+            "SEMUA ANGKA BERHASIL DITEMUKAN.";
+
+        resultIcon.textContent =
+            "🏆";
+
+        resultTitle.textContent =
+            "MENANG";
+
+        resultText.innerHTML =
+            `
+            Semua angka berhasil ditemukan.<br>
+            Sisa nyawa : ${lives}<br>
+            Bonus : +${bonus}
+            `;
+
+        finalScore.textContent =
+            score;
+
+        resultScreen.style.display =
+            "block";
+
+    },500);
+
+}
+
+
+/* ======================================
+   GAME OVER
+====================================== */
+
+function gameOver(){
+
+    gameActive = false;
+
+    canClick = false;
+
+    saveBestScore();
+
+    grid.style.display =
+        "none";
+
+    statusText.innerHTML =
+        "NYAWA HABIS.";
+
+    resultIcon.textContent =
+        "💀";
+
+    resultTitle.textContent =
+        "GAME OVER";
+
+    resultText.innerHTML =
+        `
+        Lu berhasil sampai angka
+        <b>${target - 1}</b> dari 12.
+        `;
+
+    finalScore.textContent =
+        score;
+
+    resultScreen.style.display =
+        "block";
+
+}
+
+
+/* ======================================
+   SAVE BEST SCORE
+====================================== */
+
+function saveBestScore(){
+
+    const oldScore =
+        Number(
+            localStorage.getItem(
+                "memoryScore"
+            )
+        ) || 0;
+
+    if(score > oldScore){
+
+        localStorage.setItem(
+            "memoryScore",
+            score
+        );
+
+    }
+
+}
+
+
+/* ======================================
+   BACK TO HUB
+====================================== */
+
+function goHome(){
+
+    saveBestScore();
+
+
+    /*
+       Kalau game dibuka di iframe
+       gamehub.html
+    */
+
+    if(
+        window.parent !== window &&
+        typeof window.parent.closeGame
+        === "function"
+    ){
+
+        window.parent.closeGame();
+
+    }
+
+    /*
+       Kalau memory.html dibuka
+       langsung
+    */
+
+    else{
+
+        window.location.href =
+            "gamehub.html";
+
+    }
+
+}
+
+
+/* ======================================
+   START
+====================================== */
+
+startGame();
+
+</script>
+
+</body>
+</html>
