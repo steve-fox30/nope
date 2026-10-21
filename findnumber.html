@@ -1,0 +1,401 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Find the Number | MINI GAME</title>
+  <style>
+    :root {
+      --bg: #0b0d12;
+      --panel: #141821;
+      --panel-2: #1b202b;
+      --orange: #ff922e;
+      --orange-light: #ffb15c;
+      --text: #f5f7fb;
+      --muted: #9ba4b5;
+      --green: #64e6a1;
+      --red: #ff7777;
+      --line: #2b3342;
+    }
+    * { box-sizing: border-box; }
+    body {
+      margin: 0;
+      min-height: 100vh;
+      padding: 20px 14px 26px;
+      background:
+        radial-gradient(ellipse at top, rgba(255,146,46,.10), transparent 48%),
+        var(--bg);
+      color: var(--text);
+      font-family: Inter, ui-sans-serif, system-ui, -apple-system, Segoe UI, sans-serif;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+    }
+    button { font: inherit; }
+    .app { width: min(100%, 470px); }
+    .topline {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 12px;
+      margin-bottom: 14px;
+    }
+    .brand { display: flex; align-items: center; gap: 10px; min-width: 0; }
+    .fox {
+      width: 42px; height: 42px; flex: 0 0 42px;
+      display: grid; place-items: center;
+      border: 1px solid rgba(255,146,46,.45);
+      border-radius: 13px;
+      background: linear-gradient(145deg, #2b1b10, #171820);
+      font-size: 24px;
+    }
+    .eyebrow { color: var(--orange); font-size: 10px; font-weight: 900; letter-spacing: 2px; }
+    h1 { margin: 3px 0 0; font-size: clamp(18px, 5vw, 24px); letter-spacing: .5px; }
+    .level {
+      color: var(--orange-light); background: rgba(255,146,46,.10);
+      border: 1px solid rgba(255,146,46,.28);
+      padding: 7px 10px; border-radius: 999px;
+      font-size: 11px; font-weight: 800; white-space: nowrap;
+    }
+    .panel {
+      border: 1px solid var(--line);
+      border-radius: 20px;
+      padding: clamp(12px, 3.5vw, 18px);
+      background: linear-gradient(160deg, rgba(24,29,40,.98), rgba(16,19,27,.98));
+      box-shadow: 0 18px 60px rgba(0,0,0,.3), 0 0 30px rgba(255,146,46,.035);
+    }
+    .stats {
+      display: grid; grid-template-columns: 1fr 1fr 1fr;
+      gap: 8px; margin-bottom: 15px;
+    }
+    .stat {
+      padding: 10px 7px; text-align: center;
+      background: var(--panel-2); border: 1px solid var(--line); border-radius: 12px;
+      min-width: 0;
+    }
+    .stat-label {
+      color: var(--muted); font-size: 9px; font-weight: 800;
+      letter-spacing: 1.1px; text-transform: uppercase; margin-bottom: 5px;
+    }
+    .stat-value { font-size: clamp(17px, 4.5vw, 22px); font-weight: 900; font-variant-numeric: tabular-nums; }
+    #timer.warning { color: var(--red); animation: pulse .8s infinite alternate; }
+    #score { color: var(--orange-light); }
+    .target-card {
+      display: flex; align-items: center; justify-content: space-between;
+      gap: 12px; margin-bottom: 12px; padding: 13px 15px;
+      border: 1px solid rgba(255,146,46,.35);
+      background: linear-gradient(100deg, rgba(255,146,46,.12), rgba(255,146,46,.035));
+      border-radius: 14px;
+    }
+    .target-copy { min-width: 0; }
+    .target-label { font-size: 10px; color: var(--muted); letter-spacing: 1.4px; font-weight: 800; }
+    .target-instruction { margin-top: 4px; font-size: 12px; color: #dce1e9; }
+    .target-number {
+      width: 54px; height: 54px; flex: 0 0 54px; display: grid; place-items: center;
+      border-radius: 13px; background: #2a1d12; border: 1px solid var(--orange);
+      color: var(--orange-light); font-size: 31px; font-weight: 950;
+      box-shadow: inset 0 0 20px rgba(255,146,46,.06);
+    }
+    .grid {
+      display: grid; grid-template-columns: repeat(8, minmax(0, 1fr));
+      gap: clamp(3px, 1.15vw, 6px);
+      user-select: none;
+    }
+    .cell {
+      aspect-ratio: 1; min-width: 0; padding: 0;
+      display: grid; place-items: center;
+      border: 1px solid #303746; border-radius: clamp(5px, 1.5vw, 9px);
+      background: linear-gradient(145deg, #222835, #191e28);
+      color: #f4f6fa; font-size: clamp(12px, 3.3vw, 17px); font-weight: 800;
+      cursor: pointer; transition: transform .12s, border-color .12s, background .12s;
+      -webkit-tap-highlight-color: transparent;
+    }
+    .cell:hover:not(:disabled) { border-color: var(--orange); background: #30251d; transform: translateY(-1px); }
+    .cell:active:not(:disabled) { transform: scale(.94); }
+    .cell:focus-visible { outline: 2px solid var(--orange-light); outline-offset: 2px; }
+    .cell.correct { color: var(--green); border-color: var(--green); background: rgba(37,112,76,.25); }
+    .cell.wrong { color: var(--red); border-color: var(--red); background: rgba(112,37,37,.25); }
+    .cell:disabled { cursor: default; }
+    .message {
+      min-height: 38px; margin-top: 12px; padding: 10px 12px;
+      border-radius: 10px; background: #1a202b; color: #c8cfda;
+      text-align: center; font-size: 12px; line-height: 1.4;
+      border: 1px solid #293140;
+    }
+    .message.good { color: var(--green); border-color: rgba(100,230,161,.3); }
+    .message.bad { color: var(--red); border-color: rgba(255,119,119,.3); }
+    .actions { display: flex; gap: 9px; margin-top: 12px; }
+    .btn {
+      border: 1px solid var(--line); border-radius: 11px; padding: 11px 13px;
+      color: var(--text); background: #202633; font-size: 12px; font-weight: 800;
+      cursor: pointer; transition: .15s;
+    }
+    .btn:hover { border-color: #626d80; }
+    .btn.primary { flex: 1; color: #1b1208; background: var(--orange); border-color: var(--orange); }
+    .btn.primary:hover { background: var(--orange-light); }
+    .footer { text-align: center; color: #697385; font-size: 10px; margin-top: 13px; letter-spacing: .5px; }
+    .overlay {
+      position: fixed; inset: 0; z-index: 5; padding: 18px;
+      display: none; place-items: center; background: rgba(5,7,11,.82); backdrop-filter: blur(7px);
+    }
+    .overlay.show { display: grid; }
+    .modal {
+      width: min(100%, 340px); padding: 25px 20px; text-align: center;
+      border: 1px solid rgba(255,146,46,.4); border-radius: 20px;
+      background: #151a24; box-shadow: 0 20px 70px #0009;
+    }
+    .modal-icon { font-size: 42px; }
+    .modal h2 { margin: 9px 0; font-size: 24px; }
+    .modal p { margin: 7px 0 17px; color: var(--muted); font-size: 13px; line-height: 1.5; }
+    .modal-score { color: var(--orange-light); font-size: 36px; font-weight: 950; margin: 8px 0; }
+    .modal .btn { width: 100%; margin-top: 8px; }
+    @keyframes pulse { to { opacity: .55; } }
+    @media (max-width: 360px) {
+      body { padding: 12px 9px 18px; }
+      .fox { width: 36px; height: 36px; flex-basis: 36px; font-size: 21px; }
+      .target-card { padding: 10px; }
+      .target-number { width: 46px; height: 46px; flex-basis: 46px; }
+      .stats { gap: 5px; }
+      .stat { padding: 8px 4px; }
+    }
+  </style>
+</head>
+<body>
+  <main class="app">
+    <header class="topline">
+      <div class="brand">
+        <div class="fox" aria-hidden="true">🦊</div>
+        <div>
+          <div class="eyebrow">MINI GAME / 05</div>
+          <h1>FIND THE NUMBER</h1>
+        </div>
+      </div>
+      <div class="level">HARD · 8×8</div>
+    </header>
+
+    <section class="panel" aria-label="Permainan Find the Number">
+      <div class="stats">
+        <div class="stat">
+          <div class="stat-label">Waktu</div>
+          <div class="stat-value" id="timer">03:00</div>
+        </div>
+        <div class="stat">
+          <div class="stat-label">Skor</div>
+          <div class="stat-value" id="score">0</div>
+        </div>
+        <div class="stat">
+          <div class="stat-label">Rekor</div>
+          <div class="stat-value" id="best">0</div>
+        </div>
+      </div>
+
+      <div class="target-card">
+        <div class="target-copy">
+          <div class="target-label">CARI ANGKA INI</div>
+          <div class="target-instruction">Temukan satu-satunya angka yang cocok!</div>
+        </div>
+        <div class="target-number" id="target" aria-label="Angka target">7</div>
+      </div>
+
+      <div class="grid" id="grid" aria-label="Grid angka 8 kali 8"></div>
+      <div class="message" id="message" role="status" aria-live="polite">Cari angka target di antara 64 kotak, bro!</div>
+
+      <div class="actions">
+        <button class="btn" id="homeBtn" type="button">← Kembali</button>
+        <button class="btn primary" id="restartBtn" type="button">↻ Mulai Ulang</button>
+      </div>
+    </section>
+    <div class="footer">CARI CEPAT · FOKUS · KUMPULKAN SKOR</div>
+  </main>
+
+  <div class="overlay" id="overlay" role="dialog" aria-modal="true" aria-labelledby="endTitle">
+    <div class="modal">
+      <div class="modal-icon" id="endIcon">⏱️</div>
+      <h2 id="endTitle">Waktu Habis!</h2>
+      <p id="endText">Waktu permainan selesai.</p>
+      <div class="target-label">SKOR AKHIR</div>
+      <div class="modal-score" id="finalScore">0</div>
+      <p id="recordText">Terus berlatih untuk pecahkan rekor!</p>
+      <button class="btn primary" id="playAgainBtn" type="button">Main Lagi</button>
+      <button class="btn" id="modalHomeBtn" type="button">Kembali ke Game Hub</button>
+    </div>
+  </div>
+
+  <script>
+    (() => {
+      const ROUND_SECONDS = 180;
+      const CELL_COUNT = 64;
+      const POINTS_PER_HIT = 10;
+      const BEST_KEY = 'findScore';
+
+      const gridEl = document.getElementById('grid');
+      const targetEl = document.getElementById('target');
+      const timerEl = document.getElementById('timer');
+      const scoreEl = document.getElementById('score');
+      const bestEl = document.getElementById('best');
+      const messageEl = document.getElementById('message');
+      const overlayEl = document.getElementById('overlay');
+      const finalScoreEl = document.getElementById('finalScore');
+      const recordTextEl = document.getElementById('recordText');
+
+      let target = 7;
+      let score = 0;
+      let best = readBest();
+      let secondsLeft = ROUND_SECONDS;
+      let intervalId = null;
+      let running = false;
+      let roundLocked = false;
+
+      function readBest() {
+        try { return Number(localStorage.getItem(BEST_KEY)) || 0; }
+        catch (_) { return 0; }
+      }
+
+      function saveBest() {
+        try { localStorage.setItem(BEST_KEY, String(best)); }
+        catch (_) { /* Game remains playable if storage is unavailable. */ }
+      }
+
+      function randomInt(min, max) {
+        return Math.floor(Math.random() * (max - min + 1)) + min;
+      }
+
+      function shuffle(array) {
+        for (let i = array.length - 1; i > 0; i--) {
+          const j = randomInt(0, i);
+          [array[i], array[j]] = [array[j], array[i]];
+        }
+        return array;
+      }
+
+      function createBoard() {
+        // Generate 64 values, with the target inserted exactly once.
+        const values = [];
+        for (let i = 0; i < CELL_COUNT - 1; i++) {
+          let value = randomInt(1, 9);
+          while (value === target) value = randomInt(1, 9);
+          values.push(value);
+        }
+        values.push(target);
+        return shuffle(values);
+      }
+
+      function renderBoard() {
+        const values = createBoard();
+        gridEl.replaceChildren();
+        values.forEach((value) => {
+          const button = document.createElement('button');
+          button.type = 'button';
+          button.className = 'cell';
+          button.textContent = value;
+          button.setAttribute('aria-label', 'Angka ' + value);
+          button.addEventListener('click', () => handlePick(button, value));
+          gridEl.appendChild(button);
+        });
+      }
+
+      function setMessage(text, type = '') {
+        messageEl.textContent = text;
+        messageEl.className = 'message' + (type ? ' ' + type : '');
+      }
+
+      function updateStats() {
+        scoreEl.textContent = score;
+        bestEl.textContent = best;
+        targetEl.textContent = target;
+        const mins = Math.floor(secondsLeft / 60);
+        const secs = secondsLeft % 60;
+        timerEl.textContent = String(mins).padStart(2, '0') + ':' + String(secs).padStart(2, '0');
+        timerEl.classList.toggle('warning', secondsLeft <= 15);
+      }
+
+      function handlePick(button, value) {
+        if (!running || roundLocked) return;
+
+        if (value === target) {
+          roundLocked = true;
+          button.classList.add('correct');
+          score += POINTS_PER_HIT;
+          if (score > best) {
+            best = score;
+            saveBest();
+          }
+          updateStats();
+          setMessage('BENAR! +' + POINTS_PER_HIT + ' poin. Target baru diacak!', 'good');
+          window.setTimeout(() => {
+            if (!running) return;
+            target = randomInt(1, 9);
+            roundLocked = false;
+            renderBoard();
+            updateStats();
+            setMessage('Target baru muncul. Temukan satu-satunya angka yang cocok!');
+          }, 260);
+        } else {
+          button.classList.remove('wrong');
+          // Restart the short animation when the same wrong cell is clicked.
+          void button.offsetWidth;
+          button.classList.add('wrong');
+          setMessage('Belum tepat, bro! Cari angka ' + target + '.', 'bad');
+          window.setTimeout(() => button.classList.remove('wrong'), 420);
+        }
+      }
+
+      function endGame() {
+        if (!running) return;
+        running = false;
+        clearInterval(intervalId);
+        intervalId = null;
+        gridEl.querySelectorAll('button').forEach(button => button.disabled = true);
+        document.getElementById('endIcon').textContent = '⏱️';
+        document.getElementById('endTitle').textContent = 'Waktu Habis!';
+        document.getElementById('endText').textContent = 'Mantap, bro! Ini hasil permainan lu.';
+        finalScoreEl.textContent = score;
+        recordTextEl.textContent = score >= best && score > 0
+          ? '🔥 Rekor terbaik lu sekarang: ' + best + ' poin!'
+          : 'Rekor tertinggi: ' + best + ' poin. Coba pecahkan lagi!';
+        overlayEl.classList.add('show');
+        document.getElementById('playAgainBtn').focus();
+      }
+
+      function startGame() {
+        clearInterval(intervalId);
+        overlayEl.classList.remove('show');
+        score = 0;
+        secondsLeft = ROUND_SECONDS;
+        target = randomInt(1, 9);
+        running = true;
+        roundLocked = false;
+        updateStats();
+        renderBoard();
+        setMessage('Gas! Cari angka ' + target + ' yang cuma muncul satu kali.');
+        intervalId = setInterval(() => {
+          if (!running) return;
+          secondsLeft--;
+          updateStats();
+          if (secondsLeft <= 0) endGame();
+        }, 1000);
+      }
+
+      function goHome() {
+        clearInterval(intervalId);
+        running = false;
+        // Keep the game inside the hub iframe so its background music continues.
+        if (window.parent && window.parent !== window &&
+            typeof window.parent.closeGame === 'function') {
+          window.parent.closeGame();
+        } else {
+          window.location.href = 'gamehub.html';
+        }
+      }
+
+      document.getElementById('restartBtn').addEventListener('click', startGame);
+      document.getElementById('playAgainBtn').addEventListener('click', startGame);
+      document.getElementById('homeBtn').addEventListener('click', goHome);
+      document.getElementById('modalHomeBtn').addEventListener('click', goHome);
+
+      bestEl.textContent = best;
+      startGame();
+    })();
+  </script>
+</body>
+</html>
