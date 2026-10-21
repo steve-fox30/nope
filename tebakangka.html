@@ -1,0 +1,575 @@
+
+<!DOCTYPE html>
+<html lang="id">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>TEBAK ANGKA | MINI GAME</title>
+
+<style>
+:root {
+  --orange: #ff8b32;
+  --orange-light: #ffb366;
+  --bg: #090909;
+  --panel: rgba(20, 20, 20, .94);
+  --muted: #898989;
+  --green: #66ff99;
+  --blue: #57cfff;
+  --red: #ff5b5b;
+}
+
+* {
+  box-sizing: border-box;
+}
+
+body {
+  margin: 0;
+  min-height: 100vh;
+  background:
+    radial-gradient(ellipse at top, #351b0d 0%, transparent 55%),
+    #090909;
+  color: #f5f5f5;
+  font-family: Consolas, "Courier New", monospace;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  padding: 20px;
+}
+
+body::before {
+  content: "";
+  position: fixed;
+  inset: 0;
+  pointer-events: none;
+  background-image:
+    linear-gradient(rgba(255,139,50,.035) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(255,139,50,.035) 1px, transparent 1px);
+  background-size: 30px 30px;
+}
+
+.game {
+  width: 100%;
+  max-width: 540px;
+  position: relative;
+  border: 1px solid #693918;
+  border-radius: 18px;
+  padding: 25px;
+  background: var(--panel);
+  box-shadow: 0 0 35px #ff7b2417;
+  overflow: hidden;
+}
+
+.game::before {
+  content: "";
+  position: absolute;
+  top: 0;
+  left: 12%;
+  width: 76%;
+  height: 2px;
+  background: var(--orange);
+  box-shadow: 0 0 15px var(--orange);
+}
+
+.top {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 12px;
+  margin-bottom: 25px;
+}
+
+.logo {
+  color: var(--orange);
+  font-weight: bold;
+  letter-spacing: 2px;
+  font-size: 12px;
+}
+
+.home-btn, .btn {
+  border: 1px solid var(--orange);
+  background: transparent;
+  color: var(--orange-light);
+  font: inherit;
+  font-weight: bold;
+  cursor: pointer;
+  transition: .2s;
+}
+
+.home-btn {
+  padding: 9px 12px;
+  border-radius: 7px;
+  font-size: 11px;
+}
+
+.home-btn:hover, .btn:hover {
+  background: var(--orange);
+  color: #111;
+  box-shadow: 0 0 15px #ff8b3255;
+}
+
+h1 {
+  text-align: center;
+  margin: 0;
+  color: var(--orange);
+  font-size: clamp(27px, 7vw, 37px);
+  letter-spacing: 3px;
+  text-shadow: 0 0 18px #ff8b3244;
+}
+
+.subtitle {
+  text-align: center;
+  color: var(--muted);
+  font-size: 12px;
+  margin: 10px 0 25px;
+}
+
+.stats {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 12px;
+  margin-bottom: 22px;
+}
+
+.stat {
+  border: 1px solid #343434;
+  border-radius: 10px;
+  padding: 14px;
+  text-align: center;
+  background: #101010;
+}
+
+.stat-label {
+  font-size: 10px;
+  color: var(--muted);
+  letter-spacing: 1px;
+  margin-bottom: 8px;
+}
+
+.stat-value {
+  font-size: 25px;
+  font-weight: bold;
+}
+
+.timer {
+  color: var(--orange-light);
+}
+
+.score {
+  color: var(--green);
+}
+
+.target-box {
+  text-align: center;
+  border: 1px dashed #654027;
+  border-radius: 12px;
+  padding: 17px 12px;
+  margin-bottom: 20px;
+}
+
+.target-label {
+  color: var(--muted);
+  font-size: 11px;
+  letter-spacing: 2px;
+}
+
+.target-number {
+  font-size: 42px;
+  color: #555;
+  font-weight: bold;
+  margin-top: 8px;
+  letter-spacing: 6px;
+}
+
+.question {
+  text-align: center;
+  font-size: 13px;
+  margin-bottom: 12px;
+  color: #ddd;
+}
+
+.guess-form {
+  display: flex;
+  gap: 9px;
+}
+
+input {
+  width: 100%;
+  min-width: 0;
+  background: #090909;
+  color: var(--orange-light);
+  border: 1px solid #59402e;
+  border-radius: 8px;
+  padding: 14px;
+  font: bold 20px Consolas, monospace;
+  text-align: center;
+  outline: none;
+}
+
+input:focus {
+  border-color: var(--orange);
+  box-shadow: 0 0 12px #ff8b3222;
+}
+
+.btn {
+  padding: 12px 17px;
+  border-radius: 8px;
+  white-space: nowrap;
+}
+
+.btn:disabled, input:disabled {
+  opacity: .4;
+  cursor: not-allowed;
+}
+
+.feedback {
+  margin-top: 20px;
+  min-height: 112px;
+  border-radius: 12px;
+  border: 1px solid #292929;
+  background: #0b0b0b;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  text-align: center;
+  padding: 15px;
+  gap: 6px;
+}
+
+.arrow {
+  font-size: 37px;
+  font-weight: bold;
+  line-height: 1.1;
+}
+
+.feedback-title {
+  font-weight: bold;
+  font-size: 14px;
+  letter-spacing: 1px;
+}
+
+.feedback-detail {
+  color: var(--muted);
+  font-size: 11px;
+  line-height: 1.5;
+}
+
+.neutral { color: var(--orange-light); }
+.up { color: var(--green); }
+.down { color: var(--blue); }
+.correct { color: var(--green); }
+.wrong { color: var(--red); }
+
+.progress-wrap {
+  margin-top: 18px;
+}
+
+.progress-info {
+  display: flex;
+  justify-content: space-between;
+  color: var(--muted);
+  font-size: 10px;
+  margin-bottom: 7px;
+}
+
+.progress {
+  height: 5px;
+  border-radius: 10px;
+  overflow: hidden;
+  background: #282828;
+}
+
+.progress-bar {
+  height: 100%;
+  width: 100%;
+  background: var(--orange);
+  transition: width 1s linear;
+}
+
+.actions {
+  margin-top: 18px;
+  display: none;
+}
+
+.actions .btn {
+  width: 100%;
+  padding: 14px;
+}
+
+.footer {
+  margin-top: 20px;
+  color: #565656;
+  font-size: 10px;
+  text-align: center;
+  letter-spacing: 1px;
+}
+
+@media (max-width: 420px) {
+  .game { padding: 18px; }
+  .top { align-items: flex-start; }
+  .logo { padding-top: 8px; }
+  .home-btn { font-size: 10px; }
+  .btn { padding: 12px 13px; }
+  .target-number { font-size: 36px; }
+}
+</style>
+</head>
+
+<body>
+<main class="game">
+  <div class="top">
+    <div class="logo">🦊 MINI GAME / 04</div>
+    <button class="home-btn" onclick="goHome()">← BERANDA</button>
+  </div>
+
+  <h1>TEBAK ANGKA</h1>
+  <p class="subtitle">&gt; TEMUKAN ANGKA RAHASIA_</p>
+
+  <section class="stats">
+    <div class="stat">
+      <div class="stat-label">SISA WAKTU</div>
+      <div class="stat-value timer" id="timer">04:00</div>
+    </div>
+    <div class="stat">
+      <div class="stat-label">SKOR</div>
+      <div class="stat-value score" id="score">0</div>
+    </div>
+  </section>
+
+  <section class="target-box">
+    <div class="target-label">ANGKA RAHASIA</div>
+    <div class="target-number" id="target">???</div>
+  </section>
+
+  <div class="question">Masukkan tebakan lu (1–100)</div>
+
+  <form class="guess-form" id="guessForm">
+    <input
+      type="number"
+      id="guessInput"
+      min="1"
+      max="100"
+      placeholder="?"
+      autocomplete="off"
+      required
+    >
+    <button class="btn" id="guessBtn" type="submit">TEBAK ↵</button>
+  </form>
+
+  <section class="feedback" aria-live="polite">
+    <div class="arrow neutral" id="arrow">?</div>
+    <div class="feedback-title neutral" id="feedbackTitle">
+      SIAP BERMAIN?
+    </div>
+    <div class="feedback-detail" id="feedbackDetail">
+      Masukkan angka dan temukan targetnya!
+    </div>
+  </section>
+
+  <div class="progress-wrap">
+    <div class="progress-info">
+      <span>WAKTU BERMAIN</span>
+      <span id="progressText">100%</span>
+    </div>
+    <div class="progress">
+      <div class="progress-bar" id="progressBar"></div>
+    </div>
+  </div>
+
+  <div class="actions" id="actions">
+    <button class="btn" onclick="startGame()">↻ MAIN LAGI</button>
+  </div>
+
+  <div class="footer">&gt; SYSTEM READY_ / GOOD LUCK!</div>
+</main>
+
+<script>
+const TOTAL_TIME = 240;
+const POINTS_PER_WIN = 100;
+
+let secretNumber = 0;
+let score = 0;
+let timeLeft = TOTAL_TIME;
+let timerId = null;
+let running = false;
+let bestScore = Number(localStorage.getItem("angkaScore")) || 0;
+
+const timerEl = document.getElementById("timer");
+const scoreEl = document.getElementById("score");
+const targetEl = document.getElementById("target");
+const inputEl = document.getElementById("guessInput");
+const guessBtn = document.getElementById("guessBtn");
+const arrowEl = document.getElementById("arrow");
+const feedbackTitle = document.getElementById("feedbackTitle");
+const feedbackDetail = document.getElementById("feedbackDetail");
+const progressBar = document.getElementById("progressBar");
+const progressText = document.getElementById("progressText");
+const actions = document.getElementById("actions");
+
+function newTarget() {
+  secretNumber = Math.floor(Math.random() * 100) + 1;
+  targetEl.textContent = "???";
+  inputEl.value = "";
+  inputEl.focus();
+
+  setFeedback(
+    "?",
+    "SIAP MENEBak".toUpperCase(),
+    "Angka baru sudah dipilih. Ayo temukan!",
+    "neutral"
+  );
+}
+
+function setFeedback(arrow, title, detail, state) {
+  arrowEl.textContent = arrow;
+  arrowEl.className = "arrow " + state;
+  feedbackTitle.textContent = title;
+  feedbackTitle.className = "feedback-title " + state;
+  feedbackDetail.textContent = detail;
+}
+
+function updateTimer() {
+  const minutes = Math.floor(timeLeft / 60);
+  const seconds = timeLeft % 60;
+
+  timerEl.textContent =
+    String(minutes).padStart(2, "0") + ":" +
+    String(seconds).padStart(2, "0");
+
+  const percent = (timeLeft / TOTAL_TIME) * 100;
+  progressBar.style.width = percent + "%";
+  progressText.textContent = Math.ceil(percent) + "%";
+
+  if (timeLeft <= 30) {
+    timerEl.style.color = "var(--red)";
+    progressBar.style.background = "var(--red)";
+  } else {
+    timerEl.style.color = "var(--orange-light)";
+    progressBar.style.background = "var(--orange)";
+  }
+}
+
+function startGame() {
+  clearInterval(timerId);
+
+  score = 0;
+  timeLeft = TOTAL_TIME;
+  running = true;
+
+  scoreEl.textContent = score;
+  inputEl.disabled = false;
+  guessBtn.disabled = false;
+  actions.style.display = "none";
+  timerEl.style.color = "var(--orange-light)";
+
+  newTarget();
+  updateTimer();
+
+  timerId = setInterval(() => {
+    if (!running) return;
+
+    timeLeft--;
+    updateTimer();
+
+    if (timeLeft <= 0) {
+      endGame();
+    }
+  }, 1000);
+}
+
+function endGame() {
+  running = false;
+  clearInterval(timerId);
+
+  inputEl.disabled = true;
+  guessBtn.disabled = true;
+  targetEl.textContent = secretNumber;
+
+  const isNewBest = score > bestScore;
+  if (isNewBest) {
+    bestScore = score;
+    localStorage.setItem("angkaScore", String(bestScore));
+  }
+
+  setFeedback(
+    "■",
+    "WAKTU HABIS!",
+    "Skor akhir: " + score +
+      (isNewBest ? " — REKOR BARU!" : " — Rekor terbaik: " + bestScore),
+    "wrong"
+  );
+
+  actions.style.display = "block";
+}
+
+document.getElementById("guessForm").addEventListener("submit", (event) => {
+  event.preventDefault();
+
+  if (!running) return;
+
+  const guess = Number(inputEl.value);
+
+  if (!Number.isInteger(guess) || guess < 1 || guess > 100) {
+    setFeedback(
+      "!",
+      "ANGKA TIDAK VALID",
+      "Masukkan bilangan bulat dari 1 sampai 100.",
+      "wrong"
+    );
+    inputEl.focus();
+    return;
+  }
+
+  if (guess < secretNumber) {
+    setFeedback(
+      "⬆",
+      "NAIK! TERLALU RENDAH",
+      "Cari angka yang lebih tinggi dari " + guess + ".",
+      "up"
+    );
+  } else if (guess > secretNumber) {
+    setFeedback(
+      "⬇",
+      "TURUN! TERLALU TINGGI",
+      "Cari angka yang lebih rendah dari " + guess + ".",
+      "down"
+    );
+  } else {
+    score += POINTS_PER_WIN;
+    scoreEl.textContent = score;
+
+    setFeedback(
+      "✓",
+      "BENAR! +100 POIN",
+      "Angka " + secretNumber + " berhasil ditemukan! Target baru muncul...",
+      "correct"
+    );
+
+    newTarget();
+    setFeedback(
+      "✓",
+      "BENAR! +100 POIN",
+      "Angka berhasil ditemukan! Lanjut ke target berikutnya.",
+      "correct"
+    );
+  }
+
+  inputEl.value = "";
+  inputEl.focus();
+});
+
+function goHome() {
+  if (
+    window.parent !== window &&
+    typeof window.parent.closeGame === "function"
+  ) {
+    window.parent.closeGame();
+  } else {
+    window.location.href = "gamehub.html";
+  }
+}
+
+startGame();
+</script>
+</body>
+</html>
